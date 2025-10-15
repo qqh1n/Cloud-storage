@@ -30,5 +30,8 @@ public class ConfigLoader
         return properties.getProperty("TOKEN");
     }
 
-
+    public String getStoragePath()
+    {
+        return properties.getProperty("STORAGE_PATH");
+    }
 }
