@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class SimpleStorageBot extends TelegramLongPollingBot
 {
-    final private String BOT_NAME = "CloudStorageBot";
-    final private String BOT_TOKEN = "8382168561:AAHB7pO-sC2jQRJNIq4Nx7clfVE1AYXfUI8";
+    final private String BOT_NAME = "";
+    final private String BOT_TOKEN = "";
 
     @Override
     public String getBotUsername()
