@@ -34,11 +34,11 @@ public class FileManager
 
     public File[] getFiles()
     {
+        fileBuffer = rootDirectory.listFiles();
         if (fileBufferIsEmpty())
         {
             return null;
         }
-        fileBuffer = rootDirectory.listFiles();
         return fileBuffer;
     }
 

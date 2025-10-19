@@ -69,7 +69,7 @@ public class SimpleStorageBot extends TelegramLongPollingBot {
                     GetFile getFile = new GetFile();
                     getFile.setFileId(document.getFileId());
                     String filePath = BOT_TOKEN + "/" + execute(getFile).getFilePath();
-                    
+
                     fileManager.addToFileBuffer(filePath, fileName);
                 }
             }
