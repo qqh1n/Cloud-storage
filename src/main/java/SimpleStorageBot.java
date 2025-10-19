@@ -1,6 +1,8 @@
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -11,9 +13,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class SimpleStorageBot extends TelegramLongPollingBot {
-    private String BOT_NAME;
-    private String BOT_TOKEN;
-    private FileManager fileManager;
+    private final String BOT_NAME;
+    private final String BOT_TOKEN;
+    private final FileManager fileManager;
 
     public SimpleStorageBot() {
         ConfigLoader cl = new ConfigLoader();
@@ -35,34 +37,40 @@ public class SimpleStorageBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            if (update.hasMessage() && update.getMessage().hasText()) {
-                String text = update.getMessage().getText();
-                Long chatId = update.getMessage().getChatId();
+            if (update.hasMessage()) {
+                if (update.getMessage().hasText())
+                {
+                    String text = update.getMessage().getText();
+                    Long chatId = update.getMessage().getChatId();
 
-                switch(text) {
-                    case "/start":
-                        sendMessage(chatId, "Добро пожаловать! Этот бот реализует облачное хранилище.", createKeyboard());
-                        break;
-                    case "/files":
-                        sendMessage(chatId, "Вот список сохранённых файлов:", createKeyboard());
-                        File[] files = fileManager.getFiles();
-                        sendFiles(files, chatId);
-                        break;
-                    case "/storage":
-                        String response;
-                        if (fileManager.storageFiles()) {
-                            response = "Файлы успешно сохранены.";
-                        } else {
-                            response = "Возникли проблемы с сохранением. Файлы не были сохранены.";
-                        }
-                        sendMessage(chatId, response, createKeyboard());
-                        break;
-                    case "/get":
-                        sendMessage(chatId, "Введите имя файла для получения:", createKeyboard());
-                        break;
-                    default:
-                        sendMessage(chatId, "Неизвестная команда: " + text, createKeyboard());
-                        break;
+                    switch (text) {
+                        case "/start":
+                            sendMessage(chatId, "Добро пожаловать! Этот бот реализует облачное хранилище.", createKeyboard());
+                            break;
+                        case "/files":
+                            sendFiles(chatId);
+                            break;
+                        case "/storage":
+                            storageFiles(chatId);
+                            break;
+                        case "/get":
+                            sendMessage(chatId, "Введите имя файла для получения:", createKeyboard());
+                            break;
+                        default:
+                            sendMessage(chatId, "Неизвестная команда: " + text, createKeyboard());
+                            break;
+                    }
+                }
+                else if (update.getMessage().hasDocument())
+                {
+                    Document document = update.getMessage().getDocument();
+                    String fileName = document.getFileName();
+
+                    GetFile getFile = new GetFile();
+                    getFile.setFileId(document.getFileId());
+                    String filePath = BOT_TOKEN + "/" + execute(getFile).getFilePath();
+                    
+                    fileManager.addToFileBuffer(filePath, fileName);
                 }
             }
         } catch (Exception e) {
@@ -93,25 +101,6 @@ public class SimpleStorageBot extends TelegramLongPollingBot {
         return replyKeyboardMarkup;
     }
 
-    private void sendFiles(File[] files, long chatId) {
-        if (files == null || files.length == 0) {
-            sendMessage(chatId, "Файлы не найдены.", createKeyboard());
-            return;
-        }
-
-        for (File file : files) {
-                SendDocument sendDocument = new SendDocument();
-                sendDocument.setChatId(chatId);
-                InputFile inputFile = new InputFile(file);
-                sendDocument.setDocument(inputFile);
-                try {
-                    execute(sendDocument);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-        }
-    }
-
     private void sendMessage(Long chatId, String text, ReplyKeyboardMarkup keyboard) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
@@ -123,4 +112,42 @@ public class SimpleStorageBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+
+    private void sendFiles(long chatId) {
+        File[] files = fileManager.getFiles();
+        if (files == null) {
+            sendMessage(chatId, "Файлы не найдены.", createKeyboard());
+            return;
+        }
+
+        sendMessage(chatId, "Вот список сохранённых файлов:", createKeyboard());
+        for (File file : files) {
+                SendDocument sendDocument = new SendDocument();
+                sendDocument.setChatId(chatId);
+                InputFile inputFile = new InputFile(file);
+                sendDocument.setDocument(inputFile);
+                try {
+                    execute(sendDocument);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+        }
+        return;
+    }
+
+    private void storageFiles(long chatId)
+    {
+        int numOfAddedFiles = fileManager.storageFiles();
+        if (numOfAddedFiles == 0)
+        {
+            sendMessage(chatId, "Нет файлов для сохранения.", createKeyboard());
+            return;
+        }
+        else
+        {
+            sendMessage(chatId, "Сохранённых файлов: " + numOfAddedFiles, createKeyboard());
+            return;
+        }
+    }
+
 }
