@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class SimpleStorageBot extends TelegramLongPollingBot {
     private final String BOT_NAME;
     private final String BOT_TOKEN;
-    private final FileManager fileManager;
+    private final FileSystemManagerWindows fileManager;
 
     public SimpleStorageBot() {
         ConfigLoader cl = new ConfigLoader();
@@ -132,7 +132,6 @@ public class SimpleStorageBot extends TelegramLongPollingBot {
                     e.printStackTrace();
                 }
         }
-        return;
     }
 
     private void storageFiles(long chatId)
@@ -141,12 +140,10 @@ public class SimpleStorageBot extends TelegramLongPollingBot {
         if (numOfAddedFiles == 0)
         {
             sendMessage(chatId, "Нет файлов для сохранения.", createKeyboard());
-            return;
         }
         else
         {
             sendMessage(chatId, "Сохранённых файлов: " + numOfAddedFiles, createKeyboard());
-            return;
         }
     }
 

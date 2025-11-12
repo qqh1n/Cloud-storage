@@ -2,6 +2,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 import java.io.IOException;
 
+
 public class ConfigLoader
 {
     private static final String PATH = "C:\\Users\\user\\IdeaProjects\\untitled\\config.properties";
@@ -28,10 +29,5 @@ public class ConfigLoader
     public String getToken()
     {
         return properties.getProperty("TOKEN");
-    }
-
-    public String getStoragePath()
-    {
-        return properties.getProperty("STORAGE_PATH");
     }
 }
