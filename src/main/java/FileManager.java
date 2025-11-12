@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class FileManager
 {
@@ -14,7 +16,12 @@ public class FileManager
 
     public boolean storageFile(String fileName, String filePath)
     {
-        URL url = new URL(urlBase + filePath);
+        URL url = null;
+        try {
+            url = new URL(urlBase + filePath);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
         try {
             fileManager.storageFile(url, fileName);
             return true;
@@ -25,8 +32,25 @@ public class FileManager
         }
     }
 
-    public String getFilesInDir()
+    public ArrayList<String> getFilesInDir()
     {
-        
+        File[] filesArray = fileManager.getFilesInDir();
+        ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
+
+        for (File file : filesArray)
+        {
+            if (file.isDirectory())
+            {
+                String fileFormatedString = "\uD83D\uDCC2" + " " + file.getName();
+                filesFormatedStringsArrayList.add(fileFormatedString);
+            }
+            else if (file.isFile())
+            {
+                String fileFormatedString = "\uD83D\uDCC4" + " " + file.getName();
+                filesFormatedStringsArrayList.add(fileFormatedString);
+            }
+        }
+
+        return filesFormatedStringsArrayList;
     }
 }

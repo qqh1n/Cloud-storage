@@ -15,13 +15,13 @@ import java.util.ArrayList;
 public class SimpleStorageBot extends TelegramLongPollingBot {
     private final String BOT_NAME;
     private final String BOT_TOKEN;
-    private final FileSystemManagerWindows fileManager;
+    private final FileManager fileManager;
 
     public SimpleStorageBot() {
         ConfigLoader cl = new ConfigLoader();
         BOT_NAME = cl.getName();
         BOT_TOKEN = cl.getToken();
-        fileManager = new FileManager();
+        fileManager = new FileManager(cl.getURLBase() + BOT_TOKEN + "/");
     }
 
     @Override

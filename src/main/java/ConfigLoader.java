@@ -30,4 +30,9 @@ public class ConfigLoader
     {
         return properties.getProperty("TOKEN");
     }
+
+    public String getURLBase()
+    {
+        return properties.getProperty("URL_BASE");
+    }
 }

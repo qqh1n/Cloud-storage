@@ -33,11 +33,12 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
     public void storageFile(URL url, String fileName)
             throws IOException
     {
-        InputStream inputStream = url.openStream();
-        try {
+        try(InputStream inputStream = url.openStream())
+        {
             Files.copy(inputStream,
                         Paths.get(fileSystem.getPath(fileName)),
                         StandardCopyOption.REPLACE_EXISTING);
+            fileSystem.addFile(fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
