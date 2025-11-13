@@ -1,4 +1,10 @@
+package SimpleStorageBot;
+
+import FileSystem.FileSystemManagerWindows;
+import FileSystem.FileSystemManager_I;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,6 +18,18 @@ public class FileManager
     public FileManager(String urlBase)
     {
         this.urlBase = urlBase;
+    }
+
+    public File getFile(String fileName)
+    {
+        try
+        {
+            return fileManager.getFile(fileName);
+        }
+        catch(FileNotFoundException e)
+        {
+            return null;
+        }
     }
 
     public boolean storageFile(String fileName, String filePath)

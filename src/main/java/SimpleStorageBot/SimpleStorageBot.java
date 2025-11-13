@@ -1,8 +1,8 @@
+package SimpleStorageBot;
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -12,68 +12,44 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.util.ArrayList;
 
-public class SimpleStorageBot extends TelegramLongPollingBot {
+public class SimpleStorageBot extends TelegramLongPollingBot
+{
     private final String BOT_NAME;
     private final String BOT_TOKEN;
-    private final FileManager fileManager;
+    private final MessageHandler messageHandler;
 
-    public SimpleStorageBot() {
+    public SimpleStorageBot()
+    {
         ConfigLoader cl = new ConfigLoader();
         BOT_NAME = cl.getName();
         BOT_TOKEN = cl.getToken();
-        fileManager = new FileManager(cl.getURLBase() + BOT_TOKEN + "/");
+        messageHandler = new MessageHandler(cl.getURLBase() + BOT_TOKEN + "/");
     }
 
     @Override
-    public String getBotUsername() {
+    public String getBotUsername()
+    {
         return BOT_NAME;
     }
 
     @Override
-    public String getBotToken() {
+    public String getBotToken()
+    {
         return BOT_TOKEN;
     }
 
     @Override
-    public void onUpdateReceived(Update update) {
+    public void onUpdateReceived(Update update)
+    {
         try {
-            if (update.hasMessage()) {
-                if (update.getMessage().hasText())
-                {
-                    String text = update.getMessage().getText();
-                    Long chatId = update.getMessage().getChatId();
-
-                    switch (text) {
-                        case "/start":
-                            sendMessage(chatId, "Добро пожаловать! Этот бот реализует облачное хранилище.", createKeyboard());
-                            break;
-                        case "/files":
-                            sendFiles(chatId);
-                            break;
-                        case "/storage":
-                            storageFiles(chatId);
-                            break;
-                        case "/get":
-                            sendMessage(chatId, "Введите имя файла для получения:", createKeyboard());
-                            break;
-                        default:
-                            sendMessage(chatId, "Неизвестная команда: " + text, createKeyboard());
-                            break;
-                    }
-                }
-                else if (update.getMessage().hasDocument())
-                {
-                    Document document = update.getMessage().getDocument();
-                    String fileName = document.getFileName();
-
-                    GetFile getFile = new GetFile();
-                    getFile.setFileId(document.getFileId());
-                    String filePath = BOT_TOKEN + "/" + execute(getFile).getFilePath();
-
-                    fileManager.addToFileBuffer(filePath, fileName);
-                }
+            if (update.hasMessage())
+            {
+                sendMessage(update.getMessage().getChatId(),
+                            messageHandler.executeCommand(update.getMessage()),
+                            createKeyboard());
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

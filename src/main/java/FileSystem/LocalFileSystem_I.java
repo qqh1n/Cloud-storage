@@ -1,3 +1,5 @@
+package FileSystem;
+
 public interface LocalFileSystem_I
 {
     public String getPath(String fileName);
