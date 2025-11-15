@@ -37,4 +37,9 @@ public class ConfigLoader
     {
         return properties.getProperty("URL_BASE");
     }
+
+    public String getRootDir()
+    {
+        return properties.getProperty("ROOT_DIRECTORY");
+    }
 }

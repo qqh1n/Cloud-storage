@@ -26,7 +26,7 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
     }
 
     @Override
-    public File[] getFilesInDir()
+    public File[] printFilesInDir()
     {
         return new File(fileSystem.getCurrentDirectory()).listFiles();
     }
@@ -40,7 +40,7 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
             Files.copy(inputStream,
                         Paths.get(fileSystem.getPath(fileName)),
                         StandardCopyOption.REPLACE_EXISTING);
-            fileSystem.addFile(fileName);
+
         }
         catch (IOException e)
         {

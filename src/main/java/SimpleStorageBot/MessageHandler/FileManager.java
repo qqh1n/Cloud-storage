@@ -1,8 +1,7 @@
-package SimpleStorageBot;
+package SimpleStorageBot.MessageHandler;
 
 import FileSystem.FileSystemManagerWindows;
 import FileSystem.FileSystemManager_I;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,11 +11,12 @@ import java.util.ArrayList;
 
 public class FileManager
 {
-    private final FileSystemManager_I fileManager = new FileSystemManagerWindows();
+    private final FileSystemManager_I fileSystemManagerWindows;
     private final String urlBase;
 
     public FileManager(String urlBase)
     {
+        fileSystemManagerWindows = new FileSystemManagerWindows();
         this.urlBase = urlBase;
     }
 
@@ -24,7 +24,7 @@ public class FileManager
     {
         try
         {
-            return fileManager.getFile(fileName);
+            return fileSystemManagerWindows.getFile(fileName);
         }
         catch(FileNotFoundException e)
         {
@@ -34,14 +34,14 @@ public class FileManager
 
     public boolean storageFile(String fileName, String filePath)
     {
-        URL url = null;
+        URL url;
         try {
             url = new URL(urlBase + filePath);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
         try {
-            fileManager.storageFile(url, fileName);
+            fileSystemManagerWindows.storageFile(url, fileName);
             return true;
         }
         catch (IOException e)
@@ -50,9 +50,15 @@ public class FileManager
         }
     }
 
-    public ArrayList<String> getFilesInDir()
+    public ArrayList<String> printFilesInDir()
     {
-        File[] filesArray = fileManager.getFilesInDir();
+        File[] filesArray = fileSystemManagerWindows.printFilesInDir();
+
+        if (filesArray == null)
+        {
+            return null;
+        }
+
         ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
 
         for (File file : filesArray)

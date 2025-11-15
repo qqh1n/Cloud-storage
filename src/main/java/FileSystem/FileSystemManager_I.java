@@ -9,7 +9,7 @@ public interface FileSystemManager_I
 {
     public void storageFile(URL url, String fileName)
             throws IOException;
-    public File[] getFilesInDir();
+    public File[] printFilesInDir();
     public File getFile(String fileName)
             throws FileNotFoundException;
 

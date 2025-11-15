@@ -1,9 +1,13 @@
 package SimpleStorageBot;
 
+import SimpleStorageBot.MessageHandler.MessageHandler;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -17,13 +21,14 @@ public class SimpleStorageBot extends TelegramLongPollingBot
     private final String BOT_NAME;
     private final String BOT_TOKEN;
     private final MessageHandler messageHandler;
+    private final ConfigLoader configLoader;
 
     public SimpleStorageBot()
     {
-        ConfigLoader cl = new ConfigLoader();
-        BOT_NAME = cl.getName();
-        BOT_TOKEN = cl.getToken();
-        messageHandler = new MessageHandler(cl.getURLBase() + BOT_TOKEN + "/");
+        configLoader = new ConfigLoader();
+        BOT_NAME = configLoader.getName();
+        BOT_TOKEN = configLoader.getToken();
+        messageHandler = new MessageHandler(configLoader.getURLBase() + BOT_TOKEN + "/");
     }
 
     @Override
@@ -44,9 +49,37 @@ public class SimpleStorageBot extends TelegramLongPollingBot
         try {
             if (update.hasMessage())
             {
-                sendMessage(update.getMessage().getChatId(),
-                            messageHandler.executeCommand(update.getMessage()),
+                Message message = update.getMessage();
+                if (message.hasText())
+                {
+                    Object result = messageHandler.executeCommand(message);
+
+                    if (result instanceof String)
+                    {
+                        sendMessage(message.getChatId(), ((String) result), createKeyboard());
+                    }
+                    else
+                    {
+                        sendMessage(message.getChatId(), ((File) result), createKeyboard());
+                    }
+                }
+                else if (message.hasDocument())
+                {
+                    Document document = message.getDocument();
+                    String fileName = document.getFileName();
+
+                    GetFile getFile = new GetFile();
+                    getFile.setFileId(document.getFileId());
+                    String filePath = execute(getFile).getFilePath();
+
+                    messageHandler.putToBuffer(filePath, fileName);
+                }
+                else
+                {
+                   sendMessage(message.getChatId(),
+                           "Простите, у меня лапки =(",
                             createKeyboard());
+                }
             }
         }
         catch (Exception e) {
@@ -54,7 +87,8 @@ public class SimpleStorageBot extends TelegramLongPollingBot
         }
     }
 
-    public ReplyKeyboardMarkup createKeyboard() {
+    public ReplyKeyboardMarkup createKeyboard()
+    {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(false);
@@ -64,11 +98,11 @@ public class SimpleStorageBot extends TelegramLongPollingBot
 
         KeyboardRow firstRow = new KeyboardRow();
         firstRow.add("/start");
-        firstRow.add("/storage");
+        firstRow.add("/storage <fileName>");
 
         KeyboardRow secondRow = new KeyboardRow();
         secondRow.add("/files");
-        secondRow.add("/get");
+        secondRow.add("/get <fileName>");
 
         keyboardRows.add(firstRow);
         keyboardRows.add(secondRow);
@@ -77,50 +111,34 @@ public class SimpleStorageBot extends TelegramLongPollingBot
         return replyKeyboardMarkup;
     }
 
-    private void sendMessage(Long chatId, String text, ReplyKeyboardMarkup keyboard) {
+    private void sendMessage(Long chatId, String text, ReplyKeyboardMarkup keyboard)
+    {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(text);
         message.setReplyMarkup(keyboard);
-        try {
+        try
+        {
             execute(message);
-        } catch (TelegramApiException e) {
+        }
+        catch (TelegramApiException e)
+        {
             e.printStackTrace();
         }
     }
 
-    private void sendFiles(long chatId) {
-        File[] files = fileManager.getFiles();
-        if (files == null) {
-            sendMessage(chatId, "Файлы не найдены.", createKeyboard());
-            return;
-        }
-
-        sendMessage(chatId, "Вот список сохранённых файлов:", createKeyboard());
-        for (File file : files) {
-                SendDocument sendDocument = new SendDocument();
-                sendDocument.setChatId(chatId);
-                InputFile inputFile = new InputFile(file);
-                sendDocument.setDocument(inputFile);
-                try {
-                    execute(sendDocument);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-        }
-    }
-
-    private void storageFiles(long chatId)
+    private void sendMessage(Long chatId, File file, ReplyKeyboardMarkup keyboard)
     {
-        int numOfAddedFiles = fileManager.storageFiles();
-        if (numOfAddedFiles == 0)
+        SendDocument sendDocument = new SendDocument();
+        sendDocument.setChatId(chatId);
+        InputFile inputFile = new InputFile(file);
+        sendDocument.setDocument(inputFile);
+        sendDocument.setReplyMarkup(keyboard);
+        try
         {
-            sendMessage(chatId, "Нет файлов для сохранения.", createKeyboard());
-        }
-        else
-        {
-            sendMessage(chatId, "Сохранённых файлов: " + numOfAddedFiles, createKeyboard());
+            execute(sendDocument);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
-
 }
