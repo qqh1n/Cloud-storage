@@ -1,4 +1,4 @@
-package SimpleStorageBot;
+package StorageBot;
 
 import java.io.FileInputStream;
 import java.util.Properties;

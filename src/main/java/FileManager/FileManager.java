@@ -1,9 +1,8 @@
-package SimpleStorageBot.MessageHandler;
+package FileManager;
 
-import FileSystem.FileSystemManagerWindows;
-import FileSystem.FileSystemManager_I;
+import FileManager.FileSystem.FileSystemManagerWindows;
+import FileManager.FileSystem.FileSystemManager_I;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,18 +20,23 @@ public class FileManager
     }
 
     public File getFile(String fileName)
+            throws FileManagerException
     {
         try
         {
             return fileSystemManagerWindows.getFile(fileName);
         }
-        catch(FileNotFoundException e)
+        catch(FileSystemManagerException e)
         {
-            return null;
+            if (e.code == 1)
+            {
+                throw new FileManagerException(ErrorCode.NO_SUCH_FILE);
+            }
         }
     }
 
-    public boolean storageFile(String fileName, String filePath)
+    public String storageFile(String fileName, String filePath)
+//            throws SuchFileExistExeption, IncorrectFileName
     {
         URL url;
         try {
@@ -40,13 +44,34 @@ public class FileManager
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        try {
-            fileSystemManagerWindows.storageFile(url, fileName);
-            return true;
-        }
-        catch (IOException e)
+        for (int i = 0; i <= 1000; i++)
         {
-            return false;
+            if (i != 0)
+            {
+                fileName = fileName + "(" + i + ")";
+            }
+
+//            try
+//            {
+            String savedFileName = null;
+            try {
+                savedFileName = fileSystemManagerWindows.storageFile(url, fileName);
+                return savedFileName;
+            } catch (IOException e) {
+                return savedFileName;
+            }
+//            }
+//            catch (SuchFileExistExeption e)
+//            {
+//                if (i == 1000)
+//                {
+//                    throw new SuchFileExistExeption();
+//                }
+//            }
+//            catch (IncorrectFileNameExeption e)
+//            {
+//                throw new IncorrectFileName();
+//            }
         }
     }
 

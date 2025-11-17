@@ -1,13 +1,11 @@
-package SimpleStorageBot;
+package StorageBot;
 
-import SimpleStorageBot.MessageHandler.MessageHandler;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -16,19 +14,19 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.util.ArrayList;
 
-public class SimpleStorageBot extends TelegramLongPollingBot
+public class StorageBot extends TelegramLongPollingBot
 {
     private final String BOT_NAME;
     private final String BOT_TOKEN;
-    private final MessageHandler messageHandler;
+    private final HandlerManager handlerManager;
     private final ConfigLoader configLoader;
 
-    public SimpleStorageBot()
+    public StorageBot()
     {
         configLoader = new ConfigLoader();
         BOT_NAME = configLoader.getName();
         BOT_TOKEN = configLoader.getToken();
-        messageHandler = new MessageHandler(configLoader.getURLBase() + BOT_TOKEN + "/");
+        handlerManager = new HandlerManager(this);
     }
 
     @Override
@@ -49,9 +47,11 @@ public class SimpleStorageBot extends TelegramLongPollingBot
         try {
             if (update.hasMessage())
             {
-                Message message = update.getMessage();
+                handlerManager.handleMessage(Message message);
                 if (message.hasText())
                 {
+
+
                     Object result = messageHandler.executeCommand(message);
 
                     if (result instanceof String)
@@ -72,7 +72,7 @@ public class SimpleStorageBot extends TelegramLongPollingBot
                     getFile.setFileId(document.getFileId());
                     String filePath = execute(getFile).getFilePath();
 
-                    messageHandler.putToBuffer(filePath, fileName);
+                    sendMessage(message.getChatId(), messageHandler.storageFile(fileName, filePath), createKeyboard());
                 }
                 else
                 {
@@ -98,7 +98,7 @@ public class SimpleStorageBot extends TelegramLongPollingBot
 
         KeyboardRow firstRow = new KeyboardRow();
         firstRow.add("/start");
-        firstRow.add("/storage <fileName>");
+        firstRow.add("/delete <fileName>");
 
         KeyboardRow secondRow = new KeyboardRow();
         secondRow.add("/files");

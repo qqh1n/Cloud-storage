@@ -1,19 +1,18 @@
-package SimpleStorageBot.MessageHandler;
+package StorageBot.MessageHandler;
 
+import FileManager.FileManager;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.io.File;
+
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MessageHandler
 {
     private final FileManager fileManager;
-    private HashMap<String, String> pathsAndFileNamesBufferHashMap;
 
     public MessageHandler(String urlBase)
     {
         fileManager = new FileManager(urlBase);
-        pathsAndFileNamesBufferHashMap = new HashMap<>();
     }
 
     public Object executeCommand(Message message)
@@ -43,14 +42,19 @@ public class MessageHandler
         {
             case "/start":
                 return startCommand();
-            case "/storage":
-                return storageFile(argument);
+            case "/delete":
+                return deleteFile(argument);
             case "/files":
                 return getFilesSummary();
             case "/get":
                 return getFile(argument);
         }
 
+        return null;
+    }
+
+    private String deleteFile(String fileName)
+    {
         return null;
     }
 
@@ -61,29 +65,31 @@ public class MessageHandler
                 "\n" +
                 "---\n" +
                 "\n" +
-                "## \uD83D\uDE80 Возможности\n" +
+                "## \uD83D\uDE80 Возможности:\n" +
                 "\n" +
-                "- \uD83D\uDCE4 Принимает документы (файлы) от пользователей  \n" +
-                "- \uD83D\uDCBE Сохраняет файлы в локальную папку `/storage <имя_файла>`  \n" +
-                "- \uD83D\uDCC2 Показывает список сохранённых файлов `/files`  \n" +
+                "- \uD83D\uDCE4 Принимает документы (файлы) от пользователей и сохраняет их \n" +
+                "- \uD83D\uDCBE Удаляет файл из локальной папки `/delete <имя_файла>`  \n" +
+                "- \uD83D\uDCC2 Показывает список файлов в локальной папке`/files`  \n" +
                 "- \uD83D\uDCE5 Отправляет файл обратно по команде `/get <имя_файла>`  \n" +
                 "- \uD83D\uDC4B Приветственное сообщение через `/start`";
     }
 
-    private String storageFile(String fileName)
-    {
-        for (String filePath : pathsAndFileNamesBufferHashMap.keySet())
-        {
-            if (pathsAndFileNamesBufferHashMap.get(filePath).equals(fileName))
-            {
-                if (fileManager.storageFile(fileName, filePath))
-                {
-                    return "Файл '%s' успешно сохранён.".formatted(fileName);
-                }
-            }
-        }
+    public String storageFile(String fileName, String filePath)
+{
+//        try
+//        {
+            String savedFileName = fileManager.storageFile(fileName, filePath);
+            return "Файл успешно сохранён под именем '%s'.".formatted(savedFileName);
+//        }
+//        catch (SuchFileExistExeption e)
+//        {
+//            return "Не удалось сохранить файл '%s'. Слишком много файлов с одинаковым именем.".formatted(fileName);
+//        }
+//        catch (IncorrectFileNameExeption e)
+//        {
+//            return "Не удалось сохранить файл '%s'. Его имя некорректно.".formatted(fileName);
+//        }
 
-        return "Произошла ошибка при сохранении файла '%s'".formatted(fileName);
     }
 
     private String getFilesSummary()
@@ -105,13 +111,16 @@ public class MessageHandler
         return resultString;
     }
 
-    private File getFile(String fileName)
+    private Object getFile(String fileName)
     {
-        return fileManager.getFile(fileName);
-    }
+        try
+        {
+            return fileManager.getFile(fileName);
+        }
+        catch (FileNotFoundException e)
+        {
+            return "Файл не с именем '%s' не найден.".formatted(fileName);
+        }
 
-    public void putToBuffer(String filePath, String fileName)
-    {
-        pathsAndFileNamesBufferHashMap.put(filePath, fileName);
     }
 }

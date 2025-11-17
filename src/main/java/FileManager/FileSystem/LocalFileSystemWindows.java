@@ -1,6 +1,6 @@
-package FileSystem;
+package FileManager.FileSystem;
 
-import SimpleStorageBot.ConfigLoader;
+import StorageBot.ConfigLoader;
 
 public class LocalFileSystemWindows implements LocalFileSystem_I
 {
@@ -27,5 +27,4 @@ public class LocalFileSystemWindows implements LocalFileSystem_I
     {
 
     }
-
 }
