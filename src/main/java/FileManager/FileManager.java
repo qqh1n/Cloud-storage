@@ -1,9 +1,9 @@
 package FileManager;
 
-import FileManager.FileSystem.FileSystemManagerWindows;
-import FileManager.FileSystem.FileSystemManager_I;
+import FileSystem.FileSystemManagerException;
+import FileSystem.FileSystemManagerWindows;
+import FileSystem.FileSystemManager_I;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,17 +26,15 @@ public class FileManager
         {
             return fileSystemManagerWindows.getFile(fileName);
         }
-        catch(FileSystemManagerException e)
+        catch(FileSystemManagerException fileSystemManagerException)
         {
-            if (e.code == 1)
-            {
-                throw new FileManagerException(ErrorCode.NO_SUCH_FILE);
-            }
+            throw new FileManagerException(
+                    FileManagerException.ErrorCode.NO_SUCH_FILE);
         }
     }
 
-    public String storageFile(String fileName, String filePath)
-//            throws SuchFileExistExeption, IncorrectFileName
+    public String saveFile(String fileName, String filePath)
+            throws FileManagerException
     {
         URL url;
         try {
@@ -50,29 +48,22 @@ public class FileManager
             {
                 fileName = fileName + "(" + i + ")";
             }
-
-//            try
-//            {
-            String savedFileName = null;
-            try {
-                savedFileName = fileSystemManagerWindows.storageFile(url, fileName);
-                return savedFileName;
-            } catch (IOException e) {
+            String savedFileName;
+            try
+            {
+                savedFileName = fileSystemManagerWindows.saveFile(url, fileName);
                 return savedFileName;
             }
-//            }
-//            catch (SuchFileExistExeption e)
-//            {
-//                if (i == 1000)
-//                {
-//                    throw new SuchFileExistExeption();
-//                }
-//            }
-//            catch (IncorrectFileNameExeption e)
-//            {
-//                throw new IncorrectFileName();
-//            }
+            catch (FileSystemManagerException fileSystemManagerException)
+            {
+                if (i == 1000)
+                {
+                    throw new FileManagerException(
+                            FileManagerException.ErrorCode.UPLOAD_ATTEMPTS_LIMIT_EXCEEDED);
+                }
+            }
         }
+        return fileName;
     }
 
     public ArrayList<String> printFilesInDir()

@@ -1,7 +1,8 @@
-package StorageBot.Handlers.CommandHandler;
+package StorageBot.MessageHandler.Handlers.CommandHandler;
 
 import FileManager.FileManager;
-import StorageBot.MessageHandler.MessageHandler_I;
+import FileManager.FileManagerException;
+import StorageBot.MessageHandler.Handlers.MessageHandler_I;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -32,7 +33,8 @@ public class CommandHandler implements MessageHandler_I
 
         if (text.charAt(0) != '/')
         {
-            throw CommandHandlerException(ErrorCode.INVALID_INPUT);
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.INVALID_INPUT);
         }
 
         int indSpace = text.indexOf(" ");
@@ -60,12 +62,15 @@ public class CommandHandler implements MessageHandler_I
             case "/get":
                 getFile(message, argument);
             default:
-                throw CommandHandlerException(ErrorType.UNKNOWN_COMMAND);
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.UNKNOWN_COMMAND);
         }
     }
 
     private void deleteFile(Message message, String fileName)
     {
+        sendMessage(message.getChatId(),
+                    "Эта функция пока в разработке.");
     }
 
     private void startCommand(Message message)
@@ -108,19 +113,16 @@ public class CommandHandler implements MessageHandler_I
     }
 
     private void getFile(Message message, String fileName)
+            throws CommandHandlerException
     {
         try
         {
             sendMessage(message.getChatId(), fileManager.getFile(fileName));
         }
-        catch (FileManagerException e)
+        catch (FileManagerException fileManagerException)
         {
-            if (e.code == 0)
-            {
-                String noSuchFileText =
-                        "Файла с именем '%s' не существует.".formatted(fileName);
-                sendMessage(message.getChatId(), noSuchFileText);
-            }
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.NO_SUCH_FILE_EXIST);
         }
     }
 

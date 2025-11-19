@@ -1,13 +1,15 @@
 package StorageBot;
 
 import FileManager.FileManager;
-import StorageBot.Handlers.CommandHandler.CommandHandlerException;
-import StorageBot.Handlers.DocumentHandler.DocumentHandler;
-import StorageBot.Handlers.DocumentHandler.DocumentHandlerException;
-import StorageBot.MessageHandler.MessageHandler_I;
-import StorageBot.Handlers.CommandHandler.CommandHandler;
+import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandlerException;
+import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandler;
+import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandlerException;
+import StorageBot.MessageHandler.Handlers.MessageHandler_I;
+import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandler;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.HashMap;
 
@@ -15,6 +17,7 @@ public class HandlerManager
 {
     private TelegramLongPollingBot bot;
     private HashMap<String, MessageHandler_I> handlers;
+
     public HandlerManager(TelegramLongPollingBot bot)
     {
         this.bot = bot;
@@ -24,7 +27,7 @@ public class HandlerManager
         handlers.put("DocumentHandler", new DocumentHandler(bot, fileManager));
     }
 
-    public void HandleMessage(Message message)
+    public void handleMessage(Message message)
     {
         MessageHandler_I handler;
         if (message.hasText())
@@ -34,9 +37,9 @@ public class HandlerManager
             {
                 handler.handleMessage(message);
             }
-            catch (CommandHandlerException e)
+            catch (CommandHandlerException commandHandlerException)
             {
-                sendErrorMessage(message.getChatId(), e.getMessage());
+                sendErrorMessage(message.getChatId(), commandHandlerException.getMessage());
             }
         }
         else if (message.hasDocument())
@@ -46,9 +49,9 @@ public class HandlerManager
             {
                 handler.handleMessage(message);
             }
-            catch (DocumentHandlerException e)
+            catch (DocumentHandlerException documentHandlerException)
             {
-                sendErrorMessage(message.getChatId(), e.getMessage());
+                sendErrorMessage(message.getChatId(), documentHandlerException.getMessage());
             }
         }
         else
@@ -59,11 +62,33 @@ public class HandlerManager
 
     private void sendErrorMessage(Long chatId)
     {
-
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        String messageText = "❌Получено сообщение, которое не представляется возможным обработать❌";
+        message.setText(messageText);
+        try
+        {
+            bot.execute(message);
+        }
+        catch (TelegramApiException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     private void sendErrorMessage(Long chatId, String errorMessageText)
     {
-
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        String messageText = "❌" + errorMessageText + "❌";
+        message.setText(messageText);
+        try
+        {
+            bot.execute(message);
+        }
+        catch (TelegramApiException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }

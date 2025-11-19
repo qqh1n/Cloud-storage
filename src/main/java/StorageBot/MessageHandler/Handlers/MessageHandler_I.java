@@ -1,5 +1,6 @@
-package StorageBot.MessageHandler;
+package StorageBot.MessageHandler.Handlers;
 
+import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandlerException;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public interface MessageHandler_I

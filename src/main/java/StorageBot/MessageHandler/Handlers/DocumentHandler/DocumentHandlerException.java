@@ -1,17 +1,14 @@
-package FileManager;
+package StorageBot.MessageHandler.Handlers.DocumentHandler;
 
-public class FileManagerException
+public class DocumentHandlerException
     extends Exception
 {
-    private static final ErrorCode NO_SUCH_FILE =
-            ErrorCode.NO_SUCH_FILE;
     private static final ErrorCode UPLOAD_ATTEMPTS_LIMIT_EXCEEDED =
             ErrorCode.UPLOAD_ATTEMPTS_LIMIT_EXCEEDED;
 
     public static enum ErrorCode
     {
-        NO_SUCH_FILE(0, "No such file."),
-        UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(1, "Upload attempts limit exceeded.");
+        UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(0, "Превышен лимит попыток загрузки файла.");
 
         private final int e_code;
         private final String message;
@@ -25,7 +22,7 @@ public class FileManagerException
 
     private ErrorCode e_code;
 
-    public FileManagerException(ErrorCode errorCode)
+    public DocumentHandlerException(ErrorCode errorCode)
     {
         this.e_code = errorCode;
     }

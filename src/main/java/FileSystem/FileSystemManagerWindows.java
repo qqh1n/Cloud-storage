@@ -1,4 +1,4 @@
-package FileManager.FileSystem;
+package FileSystem;
 
 import StorageBot.ConfigLoader;
 
@@ -28,14 +28,16 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
     {
         return currentDirectory + "\\" + fileName;
     }
+
     @Override
     public File getFile(String fileName)
-            throws FileNotFoundException
+            throws FileSystemManagerException
     {
         File returnFile = new File(getPath(fileName));
         if (!returnFile.exists())
         {
-            throw new FileNotFoundException();
+            throw new FileSystemManagerException(
+                        FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);
         }
         return returnFile;
     }
@@ -47,19 +49,30 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
     }
 
     @Override
-    public String storageFile(URL url, String fileName)
-//            throws IOException
+    public String saveFile(URL url, String fileName)
+            throws FileSystemManagerException
     {
-        try(InputStream inputStream = url.openStream())
+        try
         {
-            Files.copy(inputStream,
+            getFile(fileName);
+            throw new FileSystemManagerException(
+                        FileSystemManagerException.ErrorCode.SUCH_FILE_EXIST);
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
+        {
+            try(InputStream inputStream = url.openStream())
+            {
+                Files.copy(inputStream,
                         Paths.get(getPath(fileName)),
                         StandardCopyOption.REPLACE_EXISTING);
-            return fileName;
+                return fileName;
+            }
+            catch (IOException ioException)
+            {
+                throw new FileSystemManagerException(
+                            FileSystemManagerException.ErrorCode.UNABLE_TO_STORAGE_FILE);
+            }
         }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+
     }
 }

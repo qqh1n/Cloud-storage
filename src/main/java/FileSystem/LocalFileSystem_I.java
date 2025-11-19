@@ -1,4 +1,4 @@
-package FileManager.FileSystem;
+package FileSystem;
 
 public interface LocalFileSystem_I
 {
