@@ -3,7 +3,6 @@ package FileSystem;
 import StorageBot.ConfigLoader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -29,6 +28,11 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
         return currentDirectory + "\\" + fileName;
     }
 
+    private boolean isFileExists(String fileName)
+    {
+        String path = getPath(fileName);
+        return new File(path).exists();
+    }
     @Override
     public File getFile(String fileName)
             throws FileSystemManagerException
@@ -52,27 +56,22 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
     public String saveFile(URL url, String fileName)
             throws FileSystemManagerException
     {
-        try
+        if (!isFileExists(fileName))
         {
-            getFile(fileName);
-            throw new FileSystemManagerException(
-                        FileSystemManagerException.ErrorCode.SUCH_FILE_EXIST);
-        }
-        catch (FileSystemManagerException fileSystemManagerException)
-        {
-            try(InputStream inputStream = url.openStream())
-            {
+            try (InputStream inputStream = url.openStream()) {
                 Files.copy(inputStream,
                         Paths.get(getPath(fileName)),
                         StandardCopyOption.REPLACE_EXISTING);
                 return fileName;
-            }
-            catch (IOException ioException)
-            {
+            } catch (IOException ioException) {
                 throw new FileSystemManagerException(
-                            FileSystemManagerException.ErrorCode.UNABLE_TO_STORAGE_FILE);
+                        FileSystemManagerException.ErrorCode.UNABLE_TO_STORAGE_FILE);
             }
         }
-
+        else
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_STORAGE_FILE);
+        }
     }
 }

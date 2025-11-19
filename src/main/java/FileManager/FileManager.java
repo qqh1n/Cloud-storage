@@ -36,8 +36,10 @@ public class FileManager
     public String saveFile(String fileName, String filePath)
             throws FileManagerException
     {
+        String saveFileName = fileName;
         URL url;
-        try {
+        try
+        {
             url = new URL(urlBase + filePath);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
@@ -46,13 +48,14 @@ public class FileManager
         {
             if (i != 0)
             {
-                fileName = fileName + "(" + i + ")";
+                int extensionInd = saveFileName.indexOf(".");
+                saveFileName = saveFileName.substring(0, extensionInd) +
+                                "(" + i + ")" +
+                                saveFileName.substring(extensionInd);
             }
-            String savedFileName;
             try
             {
-                savedFileName = fileSystemManagerWindows.saveFile(url, fileName);
-                return savedFileName;
+                return fileSystemManagerWindows.saveFile(url, saveFileName);
             }
             catch (FileSystemManagerException fileSystemManagerException)
             {

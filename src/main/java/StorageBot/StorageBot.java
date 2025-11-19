@@ -8,14 +8,13 @@ public class StorageBot extends TelegramLongPollingBot
     private final String BOT_NAME;
     private final String BOT_TOKEN;
     private final HandlerManager handlerManager;
-    private final ConfigLoader configLoader;
 
     public StorageBot()
     {
-        configLoader = new ConfigLoader();
+        ConfigLoader configLoader;configLoader = new ConfigLoader();
         BOT_NAME = configLoader.getName();
         BOT_TOKEN = configLoader.getToken();
-        handlerManager = new HandlerManager(this);
+        handlerManager = new HandlerManager(this, configLoader.getURLBase() + BOT_TOKEN + "/");
     }
 
     @Override

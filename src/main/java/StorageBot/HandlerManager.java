@@ -1,9 +1,7 @@
 package StorageBot;
 
 import FileManager.FileManager;
-import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandlerException;
 import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandler;
-import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandlerException;
 import StorageBot.MessageHandler.Handlers.MessageHandler_I;
 import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandler;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -16,20 +14,20 @@ import java.util.HashMap;
 public class HandlerManager
 {
     private TelegramLongPollingBot bot;
-    private HashMap<String, MessageHandler_I> handlers;
+    private HashMap<String, MessageHandler_I<? extends Exception>> handlers;
 
-    public HandlerManager(TelegramLongPollingBot bot)
+    public HandlerManager(TelegramLongPollingBot bot, String urlBase)
     {
         this.bot = bot;
-        handlers = new HashMap<String, MessageHandler_I>();
-        FileManager fileManager = new FileManager;
+        handlers = new HashMap<String, MessageHandler_I<? extends Exception>>();
+        FileManager fileManager = new FileManager(urlBase);
         handlers.put("CommandHandler", new CommandHandler(bot, fileManager));
         handlers.put("DocumentHandler", new DocumentHandler(bot, fileManager));
     }
 
     public void handleMessage(Message message)
     {
-        MessageHandler_I handler;
+        MessageHandler_I<? extends Exception> handler;
         if (message.hasText())
         {
             handler = handlers.get("CommandHandler");
@@ -37,7 +35,7 @@ public class HandlerManager
             {
                 handler.handleMessage(message);
             }
-            catch (CommandHandlerException commandHandlerException)
+            catch (Exception commandHandlerException)
             {
                 sendErrorMessage(message.getChatId(), commandHandlerException.getMessage());
             }
@@ -49,7 +47,7 @@ public class HandlerManager
             {
                 handler.handleMessage(message);
             }
-            catch (DocumentHandlerException documentHandlerException)
+            catch (Exception documentHandlerException)
             {
                 sendErrorMessage(message.getChatId(), documentHandlerException.getMessage());
             }

@@ -10,8 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class DocumentHandler
-    implements MessageHandler_I
+public class DocumentHandler implements MessageHandler_I<DocumentHandlerException>
 {
     private TelegramLongPollingBot bot;
     private FileManager fileManager;

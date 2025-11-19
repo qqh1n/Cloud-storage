@@ -15,7 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.util.ArrayList;
 
-public class CommandHandler implements MessageHandler_I
+public class CommandHandler implements MessageHandler_I<CommandHandlerException>
 {
     TelegramLongPollingBot bot;
     FileManager fileManager;
@@ -55,12 +55,16 @@ public class CommandHandler implements MessageHandler_I
         {
             case "/start":
                 startCommand(message);
+                break;
             case "/delete":
                 deleteFile(message, argument);
+                break;
             case "/files":
                 getFilesSummary(message);
+                break;
             case "/get":
                 getFile(message, argument);
+                break;
             default:
                 throw new CommandHandlerException(
                         CommandHandlerException.ErrorCode.UNKNOWN_COMMAND);

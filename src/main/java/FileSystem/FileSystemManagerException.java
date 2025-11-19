@@ -33,4 +33,9 @@ public class FileSystemManagerException extends Exception
     {
         return e_code.message;
     }
+
+    public int getCode()
+    {
+        return e_code.e_code;
+    }
 }
