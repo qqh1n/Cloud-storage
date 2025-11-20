@@ -60,6 +60,9 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
             case "/mkdir":
                 makeDirectory(message, argument);
                 break;
+            case "/rmdir":
+                deleteDirectory(message, argument);
+                break;
             case "/cd":
                 callDirectory(message, argument);
                 break;
@@ -96,12 +99,12 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
     private void startCommand(Message message)
     {
         String menu =  " Cloud-storage\n" +
-                        "Телеграм-бот на **Java**, реализующий облачное хранилище:  \n" +
-                        "принимает файлы от пользователей, сохраняет их локально и позволяет получить обратно по команде.\n" +
+                        "Телеграм-бот на **Java**, реализующий облачное хранилище.\n"+
                         "\n" +
                         "---\n" +
                         "\n" +
                         "## \uD83D\uDE80 Возможности:\n" +
+                        "- \uD83D\uDDC2 Создаёт и удаляет директории и переходит по ним.\n" +
                         "- \uD83D\uDDD1\uFE0F Удаляет  указанный файл из текущей директории.\n" +
                         "- \uD83D\uDCBE Принимает файлы от пользователей и сохраняет их.\n" +
                         "- \uD83D\uDCC2 Показывает список сохранённых файлов\n" +
@@ -119,6 +122,8 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
                         "\t'/mkdir dirName' - Создать папку с именем 'dirName' в текущей папке.\n" +
                         "\t'/cd dirName' - Перейти в папку с именем 'dirName', которая находится в текущей папке.\n" +
                         "\t('/cd .' - Перейти корень файловой системы)\n" +
+                        "\t'/rmdir dirName' - Удаляет папку c именем 'dirName' (и её содержимое)," +
+                        " которая находится в текущей папке.\n " +
                         "\t'/commands' - Показать список возможных команд.\n" +
                         "\t'/delete fileName - Удалить файл с именем 'fileName' из текущей папки.\n"+
                         "\t'/files' - Вывести список файлов, находящихся в текущей папке.\n"+
@@ -149,6 +154,31 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         }
     }
 
+    private void deleteDirectory(Message message, String dirName)
+            throws CommandHandlerException {
+        if (!isValidDirName(dirName)) {
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.INVALID_DIR_NAME);
+        }
+
+        try {
+            fileManager.deleteDirectory(dirName);
+            sendMessage(message.getChatId(),
+                    "Папка '%s' успешно удалена.".formatted(dirName));
+        }
+        catch (FileManagerException fileManagerException)
+        {
+            if (fileManagerException.getCode() == 4)
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.NO_SUCH_DIR_EXIST);
+            } else {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.UNABLE_TO_DELETE_DIR);
+            }
+        }
+    }
+
     private void callDirectory(Message message, String dirName)
             throws CommandHandlerException
     {
@@ -173,7 +203,7 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
             }
 
             throw new CommandHandlerException(
-                    CommandHandlerException.ErrorCode.UNABLE_TO_CALL_DIRECTORY);
+                    CommandHandlerException.ErrorCode.UNABLE_TO_CALL_DIR);
         }
     }
 

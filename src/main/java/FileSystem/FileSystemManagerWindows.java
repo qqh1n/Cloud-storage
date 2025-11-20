@@ -33,7 +33,7 @@ public final class FileSystemManagerWindows
         else
         {
             String currentDir = ".\\";
-            int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY + "\\") + 1;
+            int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY) + ROOT_DIRECTORY.length() + 1;
             currentDir += currentDirectory.substring(userDirsInd);
             return currentDir;
         }
@@ -78,6 +78,34 @@ public final class FileSystemManagerWindows
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXIST);
+        }
+    }
+
+    @Override
+    public void deleteDirectory(String dirName)
+            throws FileSystemManagerException
+    {
+        if (!isFileExists(dirName) || !new File(getPath(dirName)).isDirectory())
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXIST);
+        }
+
+        File dirToDelete = new File(getPath(dirName));
+        String[] filesInDir = dirToDelete.list();
+        if (filesInDir.length != 0)
+        {
+            for (int i = 0; i < filesInDir.length; i++)
+            {
+                String fileName = filesInDir[i];
+                deleteFile(dirName + "\\" + fileName);
+            }
+        }
+
+        if (!dirToDelete.delete())
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_FILE);
         }
     }
 
@@ -142,10 +170,11 @@ public final class FileSystemManagerWindows
         }
     }
 
+    @Override
     public void deleteFile(String fileName)
             throws FileSystemManagerException
     {
-        if (!isFileExists(fileName))
+        if (!isFileExists(fileName) || new File(getPath(fileName)).isDirectory())
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);

@@ -15,6 +15,8 @@ public interface FileSystemManager_I
             throws FileSystemManagerException;
     public String makeDirectory(String dirName)
             throws FileSystemManagerException;
+    public void deleteDirectory(String dirName)
+            throws FileSystemManagerException;
     public void callDirectory(String dirName)
             throws FileSystemManagerException;
 }

@@ -45,6 +45,28 @@ public class FileManager
         return dirName;
     }
 
+    public void deleteDirectory(String dirName)
+            throws FileManagerException
+    {
+        try
+        {
+            fileSystemManager.deleteDirectory(dirName);
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
+        {
+            if (fileSystemManagerException.getCode() == 3)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.NO_SUCH_DIR);
+            }
+            else
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.UNABLE_TO_DELETE_DIRECTORY);
+            }
+        }
+    }
+
     public void callDirectory(String dirName)
             throws FileManagerException
     {
