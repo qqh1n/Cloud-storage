@@ -116,10 +116,13 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
     {
         String menu = "Вот список команд для бота:\n" +
                         "\tПросто отправьте файл и он автоматически сохранится в текущую папку.\n" +
-                        "\t'/commands' - Показывает список возможных команд.\n" +
-                        "\t'/delete fileName - Удаляет файл с именем 'fileName' из текущей папки.\n"+
-                        "\t'/files' - Выводит список файлов, находящихся в текущей папке.\n"+
-                        "\t'/get fileName' - Отправляет указанный файл (из текущей папки) в чат.\n";
+                        "\t'/mkdir dirName' - Создать папку с именем 'dirName' в текущей папке.\n" +
+                        "\t'/cd dirName' - Перейти в папку с именем 'dirName', которая находится в текущей папке.\n" +
+                        "\t('/cd .' - Перейти корень файловой системы)\n" +
+                        "\t'/commands' - Показать список возможных команд.\n" +
+                        "\t'/delete fileName - Удалить файл с именем 'fileName' из текущей папки.\n"+
+                        "\t'/files' - Вывести список файлов, находящихся в текущей папке.\n"+
+                        "\t'/get fileName' - Получить указанный файл (из текущей папки) в чат.\n";
         sendMessage(message.getChatId(), menu);
     }
 
@@ -140,6 +143,7 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         }
         catch (FileManagerException fileManagerException)
         {
+
             throw new CommandHandlerException(
                     CommandHandlerException.ErrorCode.UPLOAD_ATTEMPTS_LIMIT_EXCEEDED);
         }

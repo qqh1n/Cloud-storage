@@ -23,9 +23,25 @@ public final class FileSystemManagerWindows
         currentDirectory = ROOT_DIRECTORY;
     }
 
-    private String getPath(String fileName)
+    @Override
+    public String getCurrentDirectory()
     {
-        return currentDirectory + "\\" + fileName;
+        if (currentDirectory.equals(ROOT_DIRECTORY))
+        {
+            return ".\\";
+        }
+        else
+        {
+            String currentDir = ".\\";
+            int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY + "\\") + 1;
+            currentDir += currentDirectory.substring(userDirsInd);
+            return currentDir;
+        }
+    }
+
+    private String getPath(String name)
+    {
+        return currentDirectory + "\\" + name;
     }
 
     private boolean isFileExists(String fileName)
@@ -33,12 +49,63 @@ public final class FileSystemManagerWindows
         String path = getPath(fileName);
         return new File(path).exists();
     }
+
+    private boolean isDirExists(String dirName)
+    {
+        String path = getPath(dirName);
+        File dir = new File(path);
+        if (!dir.exists() || !dir.isDirectory())
+        {
+            return false;
+        }
+        return true;
+    }
+    @Override
+    public String makeDirectory(String dirName)
+            throws FileSystemManagerException
+    {
+        if (!isDirExists(dirName))
+        {
+            File newDir = new File(getPath(dirName));
+            if (!newDir.mkdir())
+            {
+                throw new FileSystemManagerException(
+                        FileSystemManagerException.ErrorCode.UNABLE_TO_MAKE_DIR);
+            }
+            return dirName;
+        }
+        else
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXIST);
+        }
+    }
+
+    @Override
+    public void callDirectory(String dirName)
+            throws FileSystemManagerException
+    {
+        if (dirName.equals("."))
+        {
+            currentDirectory = ROOT_DIRECTORY;
+        }
+        else if (isDirExists(dirName))
+        {
+            currentDirectory = getPath(dirName);
+        }
+        else
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_CALL_DIR);
+        }
+    }
+
     @Override
     public File getFile(String fileName)
             throws FileSystemManagerException
     {
         File returnFile = new File(getPath(fileName));
-        if (!returnFile.exists())
+        if (!returnFile.exists() || returnFile.isDirectory())
         {
             throw new FileSystemManagerException(
                         FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);

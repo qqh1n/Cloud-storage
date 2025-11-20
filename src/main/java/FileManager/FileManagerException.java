@@ -8,7 +8,9 @@ public class FileManagerException
         NO_SUCH_FILE(0, "No such file."),
         UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(1, "Upload attempts limit exceeded."),
         UNABLE_TO_SAVE_FILE(2,"Unable to save file."),
-        UNABLE_TO_DELETE_FILE(3, "Unable to delete file.");
+        UNABLE_TO_DELETE_FILE(3, "Unable to delete file."),
+        NO_SUCH_DIR(4, "No such directory."),
+        UNABLE_TO_CALL_DIRECTORY(5, "Unable to call directory.");
 
         private final int e_code;
         private final String message;

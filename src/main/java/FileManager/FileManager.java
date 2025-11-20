@@ -19,6 +19,54 @@ public class FileManager
         this.urlBase = urlBase;
     }
 
+    public String makeDirectory(String dirName)
+            throws FileManagerException
+    {
+        String newDirName = dirName;
+        for (int i = 0; i <= 1000; i++)
+        {
+            if (i != 0)
+            {
+                newDirName = dirName + "(" + i + ")";
+            }
+            try
+            {
+                return fileSystemManager.makeDirectory(newDirName);
+            }
+            catch (FileSystemManagerException fileSystemManagerException)
+            {
+                if (i == 1000)
+                {
+                    throw new FileManagerException(
+                            FileManagerException.ErrorCode.UPLOAD_ATTEMPTS_LIMIT_EXCEEDED);
+                }
+            }
+        }
+        return dirName;
+    }
+
+    public void callDirectory(String dirName)
+            throws FileManagerException
+    {
+        try
+        {
+            fileSystemManager.callDirectory(dirName);
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
+        {
+            if (fileSystemManagerException.getCode() == 3)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.NO_SUCH_DIR);
+            }
+            else
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.UNABLE_TO_CALL_DIRECTORY);
+            }
+        }
+    }
+
     public File getFile(String fileName)
             throws FileManagerException
     {
@@ -50,9 +98,9 @@ public class FileManager
             if (i != 0)
             {
                 int extensionInd = saveFileName.indexOf(".");
-                saveFileName = saveFileName.substring(0, extensionInd) +
+                saveFileName = fileName.substring(0, extensionInd) +
                                 "(" + i + ")" +
-                                saveFileName.substring(extensionInd);
+                                fileName.substring(extensionInd);
             }
             try
             {
@@ -102,17 +150,24 @@ public class FileManager
         }
 
         ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
-
+        String currentDirectory = "\uD83D\uDCC2" +
+                                    " " +
+                                    fileSystemManager.getCurrentDirectory();
+        filesFormatedStringsArrayList.add(currentDirectory);
         for (File file : filesArray)
         {
             if (file.isDirectory())
             {
-                String fileFormatedString = "\uD83D\uDCC2" + " " + file.getName();
+                String fileFormatedString = "\t\uD83D\uDCC2" +
+                                            " " +
+                                            file.getName();
                 filesFormatedStringsArrayList.add(fileFormatedString);
             }
             else if (file.isFile())
             {
-                String fileFormatedString = "\uD83D\uDCC4" + " " + file.getName();
+                String fileFormatedString = "\t\uD83D\uDCC4" +
+                                            " " +
+                                            file.getName();
                 filesFormatedStringsArrayList.add(fileFormatedString);
             }
         }
