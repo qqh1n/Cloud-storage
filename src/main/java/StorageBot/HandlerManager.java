@@ -37,7 +37,8 @@ public class HandlerManager
             }
             catch (Exception commandHandlerException)
             {
-                sendErrorMessage(message.getChatId(), commandHandlerException.getMessage());
+                sendErrorMessage(message.getChatId(),
+                        commandHandlerException.getMessage());
             }
         }
         else if (message.hasDocument())
@@ -49,7 +50,8 @@ public class HandlerManager
             }
             catch (Exception documentHandlerException)
             {
-                sendErrorMessage(message.getChatId(), documentHandlerException.getMessage());
+                sendErrorMessage(message.getChatId(),
+                        documentHandlerException.getMessage());
             }
         }
         else
@@ -62,7 +64,8 @@ public class HandlerManager
     {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
-        String messageText = "❌Получено сообщение, которое не представляется возможным обработать❌";
+        String messageText = "❌Получено сообщение, " +
+                "которое не представляется возможным обработать❌";
         message.setText(messageText);
         try
         {

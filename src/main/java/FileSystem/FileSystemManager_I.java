@@ -10,4 +10,6 @@ public interface FileSystemManager_I
     public File[] printFilesInDir();
     public File getFile(String fileName)
             throws FileSystemManagerException;
+    public void deleteFile(String fileName)
+            throws FileSystemManagerException;
 }

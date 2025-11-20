@@ -3,6 +3,7 @@ package StorageBot.MessageHandler.Handlers.CommandHandler;
 import FileManager.FileManager;
 import FileManager.FileManagerException;
 import StorageBot.MessageHandler.Handlers.MessageHandler_I;
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -56,6 +57,15 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
             case "/start":
                 startCommand(message);
                 break;
+            case "/mkdir":
+                makeDirectory(message, argument);
+                break;
+            case "/cd":
+                callDirectory(message, argument);
+                break;
+            case "/commands":
+                commandsCommand(message);
+                break;
             case "/delete":
                 deleteFile(message, argument);
                 break;
@@ -71,28 +81,96 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         }
     }
 
-    private void deleteFile(Message message, String fileName)
+    private boolean isValidFileName(String fileName)
     {
-        sendMessage(message.getChatId(),
-                    "Эта функция пока в разработке.");
+        String regEx = "^[^<>:\"/\\\\|?*]+\\.[^<>:\"/\\\\|?*]+$";
+        return fileName.matches(regEx);
+    }
+
+    private boolean isValidDirName(String dirName)
+    {
+        String regEx = "^[^<>:\"/\\\\|?*]+";
+        return dirName.matches(regEx);
     }
 
     private void startCommand(Message message)
     {
-        String menu =  "Телеграм-бот на **Java**, реализующий облачное хранилище:  \n" +
+        String menu =  " Cloud-storage\n" +
+                        "Телеграм-бот на **Java**, реализующий облачное хранилище:  \n" +
                         "принимает файлы от пользователей, сохраняет их локально и позволяет получить обратно по команде.\n" +
                         "\n" +
                         "---\n" +
                         "\n" +
                         "## \uD83D\uDE80 Возможности:\n" +
+                        "- \uD83D\uDDD1\uFE0F Удаляет  указанный файл из текущей директории.\n" +
+                        "- \uD83D\uDCBE Принимает файлы от пользователей и сохраняет их.\n" +
+                        "- \uD83D\uDCC2 Показывает список сохранённых файлов\n" +
+                        "- \uD83D\uDCE5 Отправляет файл обратно по команде\n" +
                         "\n" +
-                        "- \uD83D\uDCE4 Принимает документы (файлы) от пользователей и сохраняет их \n" +
-                        "- \uD83D\uDCBE Удаляет файл из локальной папки `/delete <имя_файла>`  \n" +
-                        "- \uD83D\uDCC2 Показывает список файлов в локальной папке`/files`  \n" +
-                        "- \uD83D\uDCE5 Отправляет файл обратно по команде `/get <имя_файла>`  \n" +
-                        "- \uD83D\uDC4B Приветственное сообщение через `/start`";
+                        "---\n";
 
         sendMessage(message.getChatId(), menu);
+    }
+
+    private void commandsCommand(Message message)
+    {
+        String menu = "Вот список команд для бота:\n" +
+                        "\tПросто отправьте файл и он автоматически сохранится в текущую папку.\n" +
+                        "\t'/commands' - Показывает список возможных команд.\n" +
+                        "\t'/delete fileName - Удаляет файл с именем 'fileName' из текущей папки.\n"+
+                        "\t'/files' - Выводит список файлов, находящихся в текущей папке.\n"+
+                        "\t'/get fileName' - Отправляет указанный файл (из текущей папки) в чат.\n";
+        sendMessage(message.getChatId(), menu);
+    }
+
+    private void makeDirectory(Message message, String dirName)
+            throws CommandHandlerException
+    {
+        if (!isValidDirName(dirName) || dirName.equals("."))
+        {
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.INVALID_DIR_NAME);
+        }
+
+        try
+        {
+            String resultDirName = fileManager.makeDirectory(dirName);
+            sendMessage(message.getChatId(),
+                    "Папка '%s' успешно создана.".formatted(resultDirName));
+        }
+        catch (FileManagerException fileManagerException)
+        {
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.UPLOAD_ATTEMPTS_LIMIT_EXCEEDED);
+        }
+    }
+
+    private void callDirectory(Message message, String dirName)
+            throws CommandHandlerException
+    {
+        if (!isValidDirName(dirName))
+        {
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.INVALID_DIR_NAME);
+        }
+
+        try
+        {
+            fileManager.callDirectory(dirName);
+            sendMessage(message.getChatId(),
+                    "Вы успешно перешли в папку '%s'".formatted(dirName));
+        }
+        catch (FileManagerException fileManagerException)
+        {
+            if (fileManagerException.getCode() == 4)
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.NO_SUCH_DIR_EXIST);
+            }
+
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.UNABLE_TO_CALL_DIRECTORY);
+        }
     }
 
     private void getFilesSummary(Message message)
@@ -119,6 +197,11 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
     private void getFile(Message message, String fileName)
             throws CommandHandlerException
     {
+        if (!isValidFileName(fileName))
+        {
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.INVALID_FILE_NAME);
+        }
         try
         {
             sendMessage(message.getChatId(), fileManager.getFile(fileName));
@@ -130,11 +213,43 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         }
     }
 
+    private void deleteFile(Message message, String fileName)
+            throws CommandHandlerException
+    {
+        if (!isValidFileName(fileName))
+        {
+            throw new CommandHandlerException(
+                    CommandHandlerException.ErrorCode.INVALID_FILE_NAME);
+        }
+
+        try
+        {
+            fileManager.deleteFile(fileName);
+            sendMessage(message.getChatId(),
+                    "Файл '%s' успешно удалён.".formatted(fileName));
+        }
+        catch (FileManagerException fileManagerException)
+        {
+            if (fileManagerException.getCode() == 0)
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.NO_SUCH_FILE_EXIST);
+            }
+            else
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.UNABLE_TO_DELETE_FILE);
+            }
+        }
+    }
+
     private void sendMessage(Long chatId, String messageText)
     {
+        ReplyKeyboardMarkup keyboardMarkup = createKeyboard();
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(messageText);
+        message.setReplyMarkup(keyboardMarkup);
         try
         {
             bot.execute(message);
@@ -147,10 +262,12 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
 
     private void sendMessage(Long chatId, File sendFile)
     {
+        ReplyKeyboardMarkup keyboardMarkup = createKeyboard();
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
         InputFile inputFile = new InputFile(sendFile);
         sendDocument.setDocument(inputFile);
+        sendDocument.setReplyMarkup(keyboardMarkup);
         try
         {
             bot.execute(sendDocument);
@@ -165,21 +282,15 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
     {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
         replyKeyboardMarkup.setSelective(true);
 
         ArrayList<KeyboardRow> keyboardRows = new ArrayList<>();
 
-        KeyboardRow firstRow = new KeyboardRow();
-        firstRow.add("/start");
-        firstRow.add("/delete <fileName>");
+        KeyboardRow row = new KeyboardRow();
+        row.add("/commands");
 
-        KeyboardRow secondRow = new KeyboardRow();
-        secondRow.add("/files");
-        secondRow.add("/get <fileName>");
-
-        keyboardRows.add(firstRow);
-        keyboardRows.add(secondRow);
+        keyboardRows.add(row);
 
         replyKeyboardMarkup.setKeyboard(keyboardRows);
         return replyKeyboardMarkup;

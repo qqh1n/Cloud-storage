@@ -10,15 +10,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-public final class FileSystemManagerWindows implements FileSystemManager_I
+public final class FileSystemManagerWindows
+        implements FileSystemManager_I
 {
-    private ConfigLoader configLoader;
     private final String ROOT_DIRECTORY;
     private String currentDirectory;
 
     public FileSystemManagerWindows()
     {
-        configLoader = new ConfigLoader();
+        ConfigLoader configLoader = new ConfigLoader();
         ROOT_DIRECTORY = configLoader.getRootDir();
         currentDirectory = ROOT_DIRECTORY;
     }
@@ -65,13 +65,31 @@ public final class FileSystemManagerWindows implements FileSystemManager_I
                 return fileName;
             } catch (IOException ioException) {
                 throw new FileSystemManagerException(
-                        FileSystemManagerException.ErrorCode.UNABLE_TO_STORAGE_FILE);
+                        FileSystemManagerException.ErrorCode.UNABLE_TO_SAVE_FILE);
             }
         }
         else
         {
             throw new FileSystemManagerException(
-                    FileSystemManagerException.ErrorCode.UNABLE_TO_STORAGE_FILE);
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_SAVE_FILE);
+        }
+    }
+
+    public void deleteFile(String fileName)
+            throws FileSystemManagerException
+    {
+        if (!isFileExists(fileName))
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);
+        }
+
+        File fileToDelete = new File(getPath(fileName));
+
+        if (!fileToDelete.delete())
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_FILE);
         }
     }
 }

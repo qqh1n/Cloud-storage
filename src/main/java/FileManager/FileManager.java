@@ -10,12 +10,12 @@ import java.util.ArrayList;
 
 public class FileManager
 {
-    private final FileSystemManager_I fileSystemManagerWindows;
+    private final FileSystemManager_I fileSystemManager;
     private final String urlBase;
 
     public FileManager(String urlBase)
     {
-        fileSystemManagerWindows = new FileSystemManagerWindows();
+        fileSystemManager = new FileSystemManagerWindows();
         this.urlBase = urlBase;
     }
 
@@ -24,7 +24,7 @@ public class FileManager
     {
         try
         {
-            return fileSystemManagerWindows.getFile(fileName);
+            return fileSystemManager.getFile(fileName);
         }
         catch(FileSystemManagerException fileSystemManagerException)
         {
@@ -42,7 +42,8 @@ public class FileManager
         {
             url = new URL(urlBase + filePath);
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            throw new FileManagerException(
+                    FileManagerException.ErrorCode.UNABLE_TO_SAVE_FILE);
         }
         for (int i = 0; i <= 1000; i++)
         {
@@ -55,7 +56,7 @@ public class FileManager
             }
             try
             {
-                return fileSystemManagerWindows.saveFile(url, saveFileName);
+                return fileSystemManager.saveFile(url, saveFileName);
             }
             catch (FileSystemManagerException fileSystemManagerException)
             {
@@ -69,9 +70,31 @@ public class FileManager
         return fileName;
     }
 
+    public void deleteFile(String fileName)
+            throws FileManagerException
+    {
+        try
+        {
+            fileSystemManager.deleteFile(fileName);
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
+        {
+            if (fileSystemManagerException.getCode() == 0)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.NO_SUCH_FILE);
+            }
+            else
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.UNABLE_TO_DELETE_FILE);
+            }
+        }
+    }
+
     public ArrayList<String> printFilesInDir()
     {
-        File[] filesArray = fileSystemManagerWindows.printFilesInDir();
+        File[] filesArray = fileSystemManager.printFilesInDir();
 
         if (filesArray == null)
         {

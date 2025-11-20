@@ -5,9 +5,18 @@ public class CommandHandlerException
 {
     public static enum ErrorCode
     {
-        INVALID_INPUT(0,"Invalid input."),
-        UNKNOWN_COMMAND(1,"Unknown command."),
-        NO_SUCH_FILE_EXIST(2,"No such file exist.");
+        INVALID_INPUT(0,"Неверный ввод."),
+        INVALID_FILE_NAME(1, "Неверный формат имени файла."),
+        UNKNOWN_COMMAND(2,"Неизвестная команда."),
+        NO_SUCH_FILE_EXIST(3,"Файла с таким именем не существует."),
+        UNABLE_TO_DELETE_FILE(4, "Невозможно удалить файл."),
+        INVALID_DIR_NAME(5, "Неверный формат названия папки."),
+        UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(6,
+                "Превышен лимит попыток создания директории."),
+        NO_SUCH_DIR_EXIST(3,"Папки с таким именем не существует."),
+        UNABLE_TO_CALL_DIRECTORY(4, "Невозможно перейти в папку.");
+
+
 
         private final int e_code;
         private final String message;

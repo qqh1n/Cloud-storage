@@ -10,10 +10,11 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class DocumentHandler implements MessageHandler_I<DocumentHandlerException>
+public class DocumentHandler
+        implements MessageHandler_I<DocumentHandlerException>
 {
-    private TelegramLongPollingBot bot;
-    private FileManager fileManager;
+    private final TelegramLongPollingBot bot;
+    private final FileManager fileManager;
 
     public DocumentHandler(TelegramLongPollingBot bot, FileManager fileManager)
     {
@@ -38,7 +39,8 @@ public class DocumentHandler implements MessageHandler_I<DocumentHandlerExceptio
         }
         catch (TelegramApiException telegramApiException)
         {
-            throw new RuntimeException(telegramApiException);
+            throw new DocumentHandlerException(
+                    DocumentHandlerException.ErrorCode.UNABLE_TO_SAVE_FILE);
         }
         catch (FileManagerException fileManagerException)
         {
