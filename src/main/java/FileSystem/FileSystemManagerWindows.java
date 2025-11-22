@@ -33,7 +33,8 @@ public final class FileSystemManagerWindows
         else
         {
             String currentDir = ".\\";
-            int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY) + ROOT_DIRECTORY.length() + 1;
+            int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY) +
+                    ROOT_DIRECTORY.length() + 1;
             currentDir += currentDirectory.substring(userDirsInd);
             return currentDir;
         }
@@ -77,7 +78,7 @@ public final class FileSystemManagerWindows
         else
         {
             throw new FileSystemManagerException(
-                    FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXIST);
+                    FileSystemManagerException.ErrorCode.SUCH_DIR_EXISTS);
         }
     }
 
@@ -85,10 +86,16 @@ public final class FileSystemManagerWindows
     public void deleteDirectory(String dirName)
             throws FileSystemManagerException
     {
-        if (!isFileExists(dirName) || !new File(getPath(dirName)).isDirectory())
+        if (dirName.equals(".") || dirName.equals(".."))
         {
             throw new FileSystemManagerException(
-                    FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXIST);
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
+        }
+        if (!isFileExists(dirName) ||
+                !new File(getPath(dirName)).isDirectory())
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
         }
 
         File dirToDelete = new File(getPath(dirName));
@@ -105,7 +112,7 @@ public final class FileSystemManagerWindows
         if (!dirToDelete.delete())
         {
             throw new FileSystemManagerException(
-                    FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_FILE);
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
         }
     }
 
@@ -117,6 +124,18 @@ public final class FileSystemManagerWindows
         {
             currentDirectory = ROOT_DIRECTORY;
         }
+        else if (dirName.equals(".."))
+        {
+            if (currentDirectory.equals(ROOT_DIRECTORY))
+            {
+                currentDirectory = ROOT_DIRECTORY;
+            }
+            else
+            {
+                int indexRightSlash = currentDirectory.lastIndexOf("\\");
+                currentDirectory = currentDirectory.substring(0, indexRightSlash);
+            }
+        }
         else if (isDirExists(dirName))
         {
             currentDirectory = getPath(dirName);
@@ -124,7 +143,7 @@ public final class FileSystemManagerWindows
         else
         {
             throw new FileSystemManagerException(
-                    FileSystemManagerException.ErrorCode.UNABLE_TO_CALL_DIR);
+                    FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
         }
     }
 

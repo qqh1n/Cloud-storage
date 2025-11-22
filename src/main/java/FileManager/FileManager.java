@@ -57,7 +57,7 @@ public class FileManager
             if (fileSystemManagerException.getCode() == 3)
             {
                 throw new FileManagerException(
-                        FileManagerException.ErrorCode.NO_SUCH_DIR);
+                        FileManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
             }
             else
             {
@@ -79,7 +79,7 @@ public class FileManager
             if (fileSystemManagerException.getCode() == 3)
             {
                 throw new FileManagerException(
-                        FileManagerException.ErrorCode.NO_SUCH_DIR);
+                        FileManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
             }
             else
             {
@@ -172,7 +172,7 @@ public class FileManager
         }
 
         ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
-        String currentDirectory = "\uD83D\uDCC2" +
+        String currentDirectory = "\uD83D\uDDC2" +
                                     " " +
                                     fileSystemManager.getCurrentDirectory();
         filesFormatedStringsArrayList.add(currentDirectory);
@@ -180,14 +180,14 @@ public class FileManager
         {
             if (file.isDirectory())
             {
-                String fileFormatedString = "\t\uD83D\uDCC2" +
+                String fileFormatedString = "\t\t\uD83D\uDDC2" +
                                             " " +
                                             file.getName();
                 filesFormatedStringsArrayList.add(fileFormatedString);
             }
             else if (file.isFile())
             {
-                String fileFormatedString = "\t\uD83D\uDCC4" +
+                String fileFormatedString = "\t\t\uD83D\uDCC4" +
                                             " " +
                                             file.getName();
                 filesFormatedStringsArrayList.add(fileFormatedString);

@@ -13,7 +13,7 @@ public class CommandHandlerException
         INVALID_DIR_NAME(5, "Неверный формат названия папки."),
         UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(6,
                 "Превышен лимит попыток создания директории."),
-        NO_SUCH_DIR_EXIST(3,"Папки с таким именем не существует."),
+        NO_SUCH_DIR_EXISTS(3,"Папки с таким именем не существует."),
         UNABLE_TO_CALL_DIR(4, "Невозможно перейти в папку."),
         UNABLE_TO_DELETE_DIR(5, "Невозможно удалить папку.");
 
