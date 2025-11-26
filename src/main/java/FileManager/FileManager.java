@@ -3,7 +3,9 @@ package FileManager;
 import FileSystem.FileSystemManagerException;
 import FileSystem.FileSystemManagerWindows;
 import FileSystem.FileSystemManager_I;
-import java.io.File;
+import Pair.Pair;
+
+import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -89,7 +91,7 @@ public class FileManager
         }
     }
 
-    public File getFile(String fileName)
+    public Pair<FileInputStream, String> getFile(String fileName)
             throws FileManagerException
     {
         try
@@ -164,9 +166,9 @@ public class FileManager
 
     public ArrayList<String> printFilesInDir()
     {
-        File[] filesArray = fileSystemManager.printFilesInDir();
+        ArrayList<Pair<String, Boolean>> pairsArrayList = fileSystemManager.printFilesInDir();
 
-        if (filesArray == null)
+        if (pairsArrayList == null)
         {
             return null;
         }
@@ -176,20 +178,20 @@ public class FileManager
                                     " " +
                                     fileSystemManager.getCurrentDirectory();
         filesFormatedStringsArrayList.add(currentDirectory);
-        for (File file : filesArray)
+        for (Pair<String, Boolean> pair : pairsArrayList)
         {
-            if (file.isDirectory())
+            if (pair.getSecond() == false)
             {
                 String fileFormatedString = "\t\t\uD83D\uDDC2" +
                                             " " +
-                                            file.getName();
+                                            pair.getFirst();
                 filesFormatedStringsArrayList.add(fileFormatedString);
             }
-            else if (file.isFile())
+            else if (pair.getSecond() == true)
             {
                 String fileFormatedString = "\t\t\uD83D\uDCC4" +
                                             " " +
-                                            file.getName();
+                                            pair.getFirst();
                 filesFormatedStringsArrayList.add(fileFormatedString);
             }
         }

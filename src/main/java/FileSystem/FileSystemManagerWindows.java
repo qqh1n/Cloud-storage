@@ -1,14 +1,11 @@
 package FileSystem;
 
+import Pair.Pair;
 import StorageBot.ConfigLoader;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Stack;
 
 public final class FileSystemManagerWindows
         implements FileSystemManager_I
@@ -26,13 +23,17 @@ public final class FileSystemManagerWindows
     @Override
     public String getCurrentDirectory()
     {
+/*
+        Метод, возвращающий строку с путём к текущей директории.
+        Корневая директория скрывается за знаком точки и системного разделителя.
+*/
         if (currentDirectory.equals(ROOT_DIRECTORY))
         {
-            return ".\\";
+            return "." + File.separator;
         }
         else
         {
-            String currentDir = ".\\";
+            String currentDir = "." + File.separator;
             int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY) +
                     ROOT_DIRECTORY.length() + 1;
             currentDir += currentDirectory.substring(userDirsInd);
@@ -42,29 +43,33 @@ public final class FileSystemManagerWindows
 
     private String getPath(String name)
     {
-        return currentDirectory + "\\" + name;
+        return currentDirectory + File.separator + name;
     }
 
     private boolean isFileExists(String fileName)
     {
         String path = getPath(fileName);
-        return new File(path).exists();
+        File file = new File(path);
+        return file.exists() && file.isFile();
     }
 
     private boolean isDirExists(String dirName)
     {
         String path = getPath(dirName);
         File dir = new File(path);
-        if (!dir.exists() || !dir.isDirectory())
-        {
-            return false;
-        }
-        return true;
+        return dir.exists() && dir.isDirectory();
     }
     @Override
     public String makeDirectory(String dirName)
             throws FileSystemManagerException
     {
+        /*
+        Метод, который создаёт директорию.
+        В случае существования директории с таким именем
+         выбрасывается исключение 'SUCH_DIR_EXISTS',
+         если не удалось создать директорию по другим причинам,
+         то выбрасывается исключение 'UNABLE_TO_MAKE_DIR'
+         */
         if (!isDirExists(dirName))
         {
             File newDir = new File(getPath(dirName));
@@ -86,40 +91,86 @@ public final class FileSystemManagerWindows
     public void deleteDirectory(String dirName)
             throws FileSystemManagerException
     {
+        /*
+        Метод, который удаляет директорию вместе с её содержимым
+         из текущей директории по имени.
+        Если директории с указанным именем не существует,
+         выбрасывается исключение 'NO_SUCH_DIR_EXISTS'
+        Если директорию не удалось очистить и удалить,
+         выбрасывается исключение 'UNABLE_TO_DELETE_DIR'
+         */
         if (dirName.equals(".") || dirName.equals(".."))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
         }
-        if (!isFileExists(dirName) ||
-                !new File(getPath(dirName)).isDirectory())
+        if (!isDirExists(dirName))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
         }
 
-        File dirToDelete = new File(getPath(dirName));
-        String[] filesInDir = dirToDelete.list();
-        if (filesInDir.length != 0)
-        {
-            for (int i = 0; i < filesInDir.length; i++)
-            {
-                String fileName = filesInDir[i];
-                deleteFile(dirName + "\\" + fileName);
-            }
-        }
-
-        if (!dirToDelete.delete())
+        Stack<File> filesToDeleteStack = new Stack<>();
+        File currentDir = new File(getPath(dirName));
+        filesToDeleteStack.add(currentDir);
+        
+        if (!makeStack(filesToDeleteStack, currentDir))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
         }
+
+        while (!filesToDeleteStack.empty())
+        {
+            File currentFile = filesToDeleteStack.pop();
+            if (!currentFile.delete())
+            {
+                throw new FileSystemManagerException(
+                        FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
+            }
+        }
+    }
+
+    private boolean makeStack(Stack<File> filesToDeleteStack,
+                           File currentDir)
+    {
+        File[] filesList = currentDir.listFiles();
+
+        if (filesList != null)
+        {
+           for (File file : filesList)
+           {
+               if (file.isFile())
+               {
+                   if (file.canWrite())
+                   {
+                       filesToDeleteStack.add(file);
+                   }
+                   else
+                   {
+                       return false;
+                   }
+               }
+               if (file.isDirectory())
+               {
+                   makeStack(filesToDeleteStack, file);
+               }
+           }
+        }
+        return true;
     }
 
     @Override
     public void callDirectory(String dirName)
             throws FileSystemManagerException
     {
+        /*
+        Метод для перехода в директорию по указанному имени.
+        Если директории с указанным именем не существует,
+         выбрасывается исключение 'NO_SUCH_DIR_EXISTS'
+        Если в директорию не удалось перейти,
+         выбрасывается исключение 'UNABLE_TO_CALL_DIR'
+         */
         if (dirName.equals("."))
         {
             currentDirectory = ROOT_DIRECTORY;
@@ -132,7 +183,7 @@ public final class FileSystemManagerWindows
             }
             else
             {
-                int indexRightSlash = currentDirectory.lastIndexOf("\\");
+                int indexRightSlash = currentDirectory.lastIndexOf(File.separator);
                 currentDirectory = currentDirectory.substring(0, indexRightSlash);
             }
         }
@@ -148,22 +199,42 @@ public final class FileSystemManagerWindows
     }
 
     @Override
-    public File getFile(String fileName)
+    public Pair<FileInputStream, String> getFile(String fileName)
             throws FileSystemManagerException
     {
-        File returnFile = new File(getPath(fileName));
-        if (!returnFile.exists() || returnFile.isDirectory())
+        try
+        {
+            return new Pair<>(
+                    new FileInputStream(getPath(fileName)),
+                    fileName);
+        }
+        catch (FileNotFoundException fileNotFoundException)
         {
             throw new FileSystemManagerException(
-                        FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);
+                    FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);
         }
-        return returnFile;
     }
 
     @Override
-    public File[] printFilesInDir()
+    public ArrayList<Pair<String, Boolean>> printFilesInDir()
     {
-        return new File(currentDirectory).listFiles();
+        File[] filesInDir =
+                new File(currentDirectory).listFiles();
+        ArrayList<Pair<String, Boolean>> fileNameIsFileArrayList =
+                new ArrayList<>();
+        if (filesInDir == null)
+        {
+            return null;
+        }
+
+        for (File file : filesInDir)
+        {
+            Pair<String, Boolean> pair =
+                    new Pair<>(file.getName(), file.isFile());
+            fileNameIsFileArrayList.add(pair);
+        }
+
+        return fileNameIsFileArrayList;
     }
 
     @Override
@@ -172,12 +243,25 @@ public final class FileSystemManagerWindows
     {
         if (!isFileExists(fileName))
         {
-            try (InputStream inputStream = url.openStream()) {
-                Files.copy(inputStream,
-                        Paths.get(getPath(fileName)),
-                        StandardCopyOption.REPLACE_EXISTING);
+            int buffer;
+            try (InputStream inputURLStream = url.openStream();
+                 FileOutputStream fileOutputStream =
+                         new FileOutputStream(getPath(fileName)))
+            {
+                do
+                {
+                    buffer = inputURLStream.read();
+                    if (buffer != -1)
+                    {
+                        fileOutputStream.write(buffer);
+                    }
+                }
+                while (buffer != -1);
+
                 return fileName;
-            } catch (IOException ioException) {
+            }
+            catch (IOException ioException)
+            {
                 throw new FileSystemManagerException(
                         FileSystemManagerException.ErrorCode.UNABLE_TO_SAVE_FILE);
             }
@@ -193,7 +277,7 @@ public final class FileSystemManagerWindows
     public void deleteFile(String fileName)
             throws FileSystemManagerException
     {
-        if (!isFileExists(fileName) || new File(getPath(fileName)).isDirectory())
+        if (!isFileExists(fileName))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);

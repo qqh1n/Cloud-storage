@@ -1,6 +1,7 @@
 package StorageBot.MessageHandler.Handlers.CommandHandler;
 
 import FileManager.FileManager;
+import Pair.Pair;
 import StorageBot.MessageHandler.Handlers.CommandHandler.Commands.Command_I;
 import StorageBot.MessageHandler.Handlers.MessageHandler_I;
 
@@ -13,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 
@@ -69,7 +70,7 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         }
         else
         {
-            sendMessage(chatId, (File) objToSend);
+            sendMessage(chatId, (Pair<FileInputStream, String>) objToSend);
         }
     }
 
@@ -90,12 +91,14 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         }
     }
 
-    private void sendMessage(Long chatId, File sendFile)
+    private void sendMessage(Long chatId,
+                             Pair<FileInputStream, String> pair)
     {
         ReplyKeyboardMarkup keyboardMarkup = createKeyboard();
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
-        InputFile inputFile = new InputFile(sendFile);
+        InputFile inputFile = new InputFile(pair.getFirst(),
+                                            pair.getSecond());
         sendDocument.setDocument(inputFile);
         sendDocument.setReplyMarkup(keyboardMarkup);
         try
