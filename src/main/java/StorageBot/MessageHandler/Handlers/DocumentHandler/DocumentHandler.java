@@ -35,7 +35,7 @@ public class DocumentHandler
             String filePath = bot.execute(getFile).getFilePath();
             String nameOfSavedFile = fileManager.saveFile(fileName,filePath);
             sendMessage(message.getChatId(),
-                        "Файл успешно сохранён по именем '%s'".formatted(nameOfSavedFile));
+                        "Файл успешно сохранён под именем '%s'".formatted(nameOfSavedFile));
         }
         catch (TelegramApiException telegramApiException)
         {

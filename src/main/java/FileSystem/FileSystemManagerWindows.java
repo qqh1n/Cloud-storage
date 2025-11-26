@@ -5,6 +5,7 @@ import StorageBot.ConfigLoader;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
 
 public final class FileSystemManagerWindows
@@ -112,8 +113,16 @@ public final class FileSystemManagerWindows
 
         Stack<File> filesToDeleteStack = new Stack<>();
         File currentDir = new File(getPath(dirName));
-        filesToDeleteStack.add(currentDir);
-        
+        if (currentDir.canWrite())
+        {
+            filesToDeleteStack.add(currentDir);
+        }
+        else
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
+        }
+
         if (!makeStack(filesToDeleteStack, currentDir))
         {
             throw new FileSystemManagerException(
@@ -140,20 +149,17 @@ public final class FileSystemManagerWindows
         {
            for (File file : filesList)
            {
-               if (file.isFile())
-               {
-                   if (file.canWrite())
+               if (file.canWrite())
                    {
                        filesToDeleteStack.add(file);
+                       if (file.isDirectory())
+                       {
+                           makeStack(filesToDeleteStack, file);
+                       }
                    }
-                   else
-                   {
-                       return false;
-                   }
-               }
-               if (file.isDirectory())
+               else
                {
-                   makeStack(filesToDeleteStack, file);
+                   return false;
                }
            }
         }

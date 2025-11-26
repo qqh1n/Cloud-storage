@@ -27,7 +27,7 @@ public class MakeDirectoryCommand implements Command_I
         try
         {
             String resultDirName = fileManager.makeDirectory(dirName);
-            return "Папка '%s' успешно создана.".formatted(resultDirName);
+            return "Папка успешно создана под именем '%s'.".formatted(resultDirName);
         }
         catch (FileManagerException fileManagerException)
         {
