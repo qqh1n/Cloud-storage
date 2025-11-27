@@ -1,14 +1,14 @@
-package StorageBot.MessageHandler.Handlers.DocumentHandler;
+package StorageBot.MessageHandler.Handlers.AudioHandler;
 
-public class DocumentHandlerException
-    extends Exception
+public class AudioHandlerException
+        extends Exception
 {
     public enum ErrorCode
     {
         UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(0,
-                "Превышен лимит попыток загрузки файла."),
-        UNABLE_TO_SAVE_FILE(1,
-                            "Невозможно сохранить файл.");
+                "Превышен лимит попыток загрузки аудио."),
+        UNABLE_TO_SAVE_AUDIO(1,
+                "Невозможно сохранить аудио.");
 
         private final int e_code;
         private final String message;
@@ -22,11 +22,10 @@ public class DocumentHandlerException
 
     private final ErrorCode e_code;
 
-    public DocumentHandlerException(ErrorCode errorCode)
+    public AudioHandlerException(ErrorCode errorCode)
     {
         this.e_code = errorCode;
     }
-
     public int getCode()
     {
         return e_code.e_code;

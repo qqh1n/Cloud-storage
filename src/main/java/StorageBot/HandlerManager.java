@@ -1,6 +1,7 @@
 package StorageBot;
 
 import FileManager.FileManager;
+import StorageBot.MessageHandler.Handlers.AudioHandler.AudioHandler;
 import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandlerException;
 import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandler;
 import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandlerException;
@@ -25,6 +26,9 @@ public class HandlerManager
         FileManager fileManager = new FileManager(urlBase);
         handlers.put("CommandHandler", new CommandHandler(bot, fileManager));
         handlers.put("DocumentHandler", new DocumentHandler(bot, fileManager));
+        handlers.put("AudioHandler", new AudioHandler(bot, fileManager));
+        handlers.put("PhotoHandler", new PhotoHandler(bot, fileManager));
+        handlers.put("VideoHandler", new VideoHandler(bot, fileManager));
     }
 
     public void handleMessage(Message message)
@@ -52,9 +56,21 @@ public class HandlerManager
         {
             handler = handlers.get("CommandHandler");
         }
-        else
+        else if (message.hasDocument())
         {
             handler = handlers.get("DocumentHandler");
+        }
+        else if (message.hasAudio())
+        {
+            handler = handlers.get("AudioHandler");
+        }
+        else if (message.hasPhoto())
+        {
+            handler = handlers.get("PhotoHandler");
+        }
+        else if (message.hasVideo())
+        {
+            handler = handlers.get("VideoHandler");
         }
         handler.handleMessage(message);
     }
