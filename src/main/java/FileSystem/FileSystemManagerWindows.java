@@ -2,6 +2,8 @@ package FileSystem;
 
 import Pair.Pair;
 import StorageBot.ConfigLoader;
+
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -249,6 +251,7 @@ public final class FileSystemManagerWindows
     {
         if (!isFileExists(fileName))
         {
+
             int buffer;
             try (InputStream inputURLStream = url.openStream();
                  FileOutputStream fileOutputStream =

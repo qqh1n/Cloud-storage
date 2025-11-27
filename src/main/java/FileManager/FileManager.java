@@ -121,7 +121,7 @@ public class FileManager
         {
             if (i != 0)
             {
-                int extensionInd = saveFileName.indexOf(".");
+                int extensionInd = fileName.lastIndexOf(".");
                 saveFileName = fileName.substring(0, extensionInd) +
                                 "(" + i + ")" +
                                 fileName.substring(extensionInd);

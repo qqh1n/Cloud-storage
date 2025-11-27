@@ -1,6 +1,8 @@
 package StorageBot;
 
 import FileManager.FileManager;
+import StorageBot.MessageHandler.Handlers.PhotoHandler.PhotoHandler;
+import StorageBot.MessageHandler.Handlers.PhotoHandler.PhotoHandlerException;
 import StorageBot.MessageHandler.Handlers.AudioHandler.AudioHandler;
 import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandlerException;
 import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandler;
@@ -28,7 +30,6 @@ public class HandlerManager
         handlers.put("DocumentHandler", new DocumentHandler(bot, fileManager));
         handlers.put("AudioHandler", new AudioHandler(bot, fileManager));
         handlers.put("PhotoHandler", new PhotoHandler(bot, fileManager));
-        handlers.put("VideoHandler", new VideoHandler(bot, fileManager));
     }
 
     public void handleMessage(Message message)
@@ -79,7 +80,8 @@ public class HandlerManager
             (Message message, Exception handlerException)
     {
         if (handlerException instanceof CommandHandlerException ||
-                handlerException instanceof DocumentHandlerException)
+                handlerException instanceof DocumentHandlerException||
+                handlerException instanceof PhotoHandlerException)
         {
             sendErrorMessage(message.getChatId(), handlerException.getMessage());
         }
