@@ -9,6 +9,8 @@ import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandler;
 import StorageBot.MessageHandler.Handlers.DocumentHandler.DocumentHandlerException;
 import StorageBot.MessageHandler.Handlers.MessageHandler_I;
 import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandler;
+import StorageBot.MessageHandler.Handlers.VideoHandler.VideoHandler;
+import StorageBot.MessageHandler.Handlers.VideoHandler.VideoHandlerException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -30,6 +32,7 @@ public class HandlerManager
         handlers.put("DocumentHandler", new DocumentHandler(bot, fileManager));
         handlers.put("AudioHandler", new AudioHandler(bot, fileManager));
         handlers.put("PhotoHandler", new PhotoHandler(bot, fileManager));
+        handlers.put("VideoHandler", new VideoHandler(bot, fileManager));
     }
 
     public void handleMessage(Message message)
@@ -81,7 +84,8 @@ public class HandlerManager
     {
         if (handlerException instanceof CommandHandlerException ||
                 handlerException instanceof DocumentHandlerException||
-                handlerException instanceof PhotoHandlerException)
+                handlerException instanceof PhotoHandlerException ||
+                handlerException instanceof VideoHandlerException)
         {
             sendErrorMessage(message.getChatId(), handlerException.getMessage());
         }
