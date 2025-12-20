@@ -1,7 +1,5 @@
 package Pair;
 
-import java.io.FileInputStream;
-
 public class Pair<L,R>
 {
     private final L l;

@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -92,23 +93,27 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
     }
 
     private void sendMessage(Long chatId,
-                             Pair<FileInputStream, String> pair)
-    {
-        ReplyKeyboardMarkup keyboardMarkup = createKeyboard();
-        SendDocument sendDocument = new SendDocument();
-        sendDocument.setChatId(chatId);
-        InputFile inputFile = new InputFile(pair.getFirst(),
-                                            pair.getSecond());
-        sendDocument.setDocument(inputFile);
-        sendDocument.setReplyMarkup(keyboardMarkup);
-        try
+                             Pair<FileInputStream, String> pair) {
+        try (FileInputStream fileInputStream = pair.getFirst())
         {
+            ReplyKeyboardMarkup keyboardMarkup = createKeyboard();
+            SendDocument sendDocument = new SendDocument();
+            sendDocument.setChatId(chatId);
+            InputFile inputFile = new InputFile(fileInputStream,
+                    pair.getSecond());
+            sendDocument.setDocument(inputFile);
+            sendDocument.setReplyMarkup(keyboardMarkup);
             bot.execute(sendDocument);
         }
-        catch (TelegramApiException e)
+        catch (TelegramApiException telegramApiException)
         {
-            throw new RuntimeException(e);
+            throw new RuntimeException(telegramApiException);
         }
+        catch (IOException ioException)
+        {
+            throw new RuntimeException(ioException);
+        }
+
     }
 
     public ReplyKeyboardMarkup createKeyboard()

@@ -3,18 +3,18 @@ package FileSystem;
 import Pair.Pair;
 import StorageBot.ConfigLoader;
 
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Stack;
 
-public final class FileSystemManagerWindows
+public class FileSystemManagerWindows
         implements FileSystemManager_I
 {
     private final String ROOT_DIRECTORY;
+    private final String separator = File.separator;
     private String currentDirectory;
+
 
     public FileSystemManagerWindows()
     {
@@ -23,20 +23,16 @@ public final class FileSystemManagerWindows
         currentDirectory = ROOT_DIRECTORY;
     }
 
-    @Override
+
     public String getCurrentDirectory()
     {
-/*
-        Метод, возвращающий строку с путём к текущей директории.
-        Корневая директория скрывается за знаком точки и системного разделителя.
-*/
         if (currentDirectory.equals(ROOT_DIRECTORY))
         {
-            return "." + File.separator;
+            return "." + separator;
         }
         else
         {
-            String currentDir = "." + File.separator;
+            String currentDir = "." + separator;
             int userDirsInd = currentDirectory.indexOf(ROOT_DIRECTORY) +
                     ROOT_DIRECTORY.length() + 1;
             currentDir += currentDirectory.substring(userDirsInd);
@@ -44,10 +40,12 @@ public final class FileSystemManagerWindows
         }
     }
 
+
     private String getPath(String name)
     {
-        return currentDirectory + File.separator + name;
+        return currentDirectory + separator + name;
     }
+
 
     private boolean isFileExists(String fileName)
     {
@@ -56,23 +54,18 @@ public final class FileSystemManagerWindows
         return file.exists() && file.isFile();
     }
 
+
     private boolean isDirExists(String dirName)
     {
         String path = getPath(dirName);
         File dir = new File(path);
         return dir.exists() && dir.isDirectory();
     }
-    @Override
+
+
     public String makeDirectory(String dirName)
             throws FileSystemManagerException
     {
-        /*
-        Метод, который создаёт директорию.
-        В случае существования директории с таким именем
-         выбрасывается исключение 'SUCH_DIR_EXISTS',
-         если не удалось создать директорию по другим причинам,
-         то выбрасывается исключение 'UNABLE_TO_MAKE_DIR'
-         */
         if (!isDirExists(dirName))
         {
             File newDir = new File(getPath(dirName));
@@ -90,18 +83,10 @@ public final class FileSystemManagerWindows
         }
     }
 
-    @Override
+
     public void deleteDirectory(String dirName)
             throws FileSystemManagerException
     {
-        /*
-        Метод, который удаляет директорию вместе с её содержимым
-         из текущей директории по имени.
-        Если директории с указанным именем не существует,
-         выбрасывается исключение 'NO_SUCH_DIR_EXISTS'
-        Если директорию не удалось очистить и удалить,
-         выбрасывается исключение 'UNABLE_TO_DELETE_DIR'
-         */
         if (dirName.equals(".") || dirName.equals(".."))
         {
             throw new FileSystemManagerException(
@@ -168,17 +153,10 @@ public final class FileSystemManagerWindows
         return true;
     }
 
-    @Override
+
     public void callDirectory(String dirName)
             throws FileSystemManagerException
     {
-        /*
-        Метод для перехода в директорию по указанному имени.
-        Если директории с указанным именем не существует,
-         выбрасывается исключение 'NO_SUCH_DIR_EXISTS'
-        Если в директорию не удалось перейти,
-         выбрасывается исключение 'UNABLE_TO_CALL_DIR'
-         */
         if (dirName.equals("."))
         {
             currentDirectory = ROOT_DIRECTORY;
@@ -191,7 +169,7 @@ public final class FileSystemManagerWindows
             }
             else
             {
-                int indexRightSlash = currentDirectory.lastIndexOf(File.separator);
+                int indexRightSlash = currentDirectory.lastIndexOf(separator);
                 currentDirectory = currentDirectory.substring(0, indexRightSlash);
             }
         }
@@ -206,7 +184,7 @@ public final class FileSystemManagerWindows
         }
     }
 
-    @Override
+
     public Pair<FileInputStream, String> getFile(String fileName)
             throws FileSystemManagerException
     {
@@ -223,7 +201,7 @@ public final class FileSystemManagerWindows
         }
     }
 
-    @Override
+
     public ArrayList<Pair<String, Boolean>> printFilesInDir()
     {
         File[] filesInDir =
@@ -245,7 +223,7 @@ public final class FileSystemManagerWindows
         return fileNameIsFileArrayList;
     }
 
-    @Override
+
     public String saveFile(URL url, String fileName)
             throws FileSystemManagerException
     {
@@ -282,7 +260,7 @@ public final class FileSystemManagerWindows
         }
     }
 
-    @Override
+
     public void deleteFile(String fileName)
             throws FileSystemManagerException
     {

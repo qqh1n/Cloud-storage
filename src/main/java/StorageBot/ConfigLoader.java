@@ -7,7 +7,8 @@ import java.io.IOException;
 
 public class ConfigLoader
 {
-    private static final String PATH = "C:\\Users\\user\\IdeaProjects\\untitled\\config.properties";
+    private static final String PATH = "C:\\Users\\user\\IdeaProjects" +
+                                        "\\untitled\\config.properties";
     private static Properties properties;
 
     public ConfigLoader()

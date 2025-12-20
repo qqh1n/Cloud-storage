@@ -37,12 +37,9 @@ public class HandlerManager
 
     public void handleMessage(Message message)
     {
-
-        MessageHandler_I<? extends Exception> handler = null;
-
         try
         {
-            handleMsg(message, handler);
+            handleMsg(message);
         }
         catch (Exception handlerException)
         {
@@ -52,31 +49,32 @@ public class HandlerManager
     }
 
     void handleMsg
-            (Message message,
-             MessageHandler_I <? extends  Exception> handler)
+            (Message message)
             throws Exception
     {
+        MessageHandler_I<? extends Exception> handler_I = null;
+
         if (message.hasText())
         {
-            handler = handlers.get("CommandHandler");
+            handler_I = handlers.get("CommandHandler");
         }
         else if (message.hasDocument())
         {
-            handler = handlers.get("DocumentHandler");
+            handler_I = handlers.get("DocumentHandler");
         }
         else if (message.hasAudio())
         {
-            handler = handlers.get("AudioHandler");
+            handler_I = handlers.get("AudioHandler");
         }
         else if (message.hasPhoto())
         {
-            handler = handlers.get("PhotoHandler");
+            handler_I = handlers.get("PhotoHandler");
         }
         else if (message.hasVideo())
         {
-            handler = handlers.get("VideoHandler");
+            handler_I = handlers.get("VideoHandler");
         }
-        handler.handleMessage(message);
+        handler_I.handleMessage(message);
     }
 
     void handleException

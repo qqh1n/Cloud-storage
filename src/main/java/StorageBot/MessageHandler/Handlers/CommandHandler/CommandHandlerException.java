@@ -10,12 +10,13 @@ public class CommandHandlerException
         UNKNOWN_COMMAND(2,"Неизвестная команда."),
         NO_SUCH_FILE_EXIST(3,"Файла с таким именем не существует."),
         UNABLE_TO_DELETE_FILE(4, "Невозможно удалить файл."),
-        INVALID_DIR_NAME(5, "Неверный формат названия папки."),
-        UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(6,
+        UNABLE_TO_GET_FILE(5, "Не удаётся получить файл."),
+        INVALID_DIR_NAME(6, "Неверный формат названия папки."),
+        UPLOAD_ATTEMPTS_LIMIT_EXCEEDED(7,
                 "Превышен лимит попыток создания директории."),
-        NO_SUCH_DIR_EXISTS(3,"Папки с таким именем не существует."),
-        UNABLE_TO_CALL_DIR(4, "Невозможно перейти в папку."),
-        UNABLE_TO_DELETE_DIR(5, "Невозможно удалить папку.");
+        NO_SUCH_DIR_EXISTS(8,"Папки с таким именем не существует."),
+        UNABLE_TO_CALL_DIR(9, "Невозможно перейти в папку."),
+        UNABLE_TO_DELETE_DIR(10, "Невозможно удалить папку.");
 
 
 

@@ -11,10 +11,11 @@ public class StorageBot extends TelegramLongPollingBot
 
     public StorageBot()
     {
-        ConfigLoader configLoader;configLoader = new ConfigLoader();
+        ConfigLoader configLoader = new ConfigLoader();
         BOT_NAME = configLoader.getName();
         BOT_TOKEN = configLoader.getToken();
-        handlerManager = new HandlerManager(this, configLoader.getURLBase() + BOT_TOKEN + "/");
+        handlerManager = new HandlerManager(this,
+                configLoader.getURLBase() + BOT_TOKEN + "/");
     }
 
     @Override
@@ -32,14 +33,9 @@ public class StorageBot extends TelegramLongPollingBot
     @Override
     public void onUpdateReceived(Update update)
     {
-        try {
-            if (update.hasMessage())
-            {
-                handlerManager.handleMessage(update.getMessage());
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        if (update.hasMessage())
+        {
+            handlerManager.handleMessage(update.getMessage());
         }
     }
 }

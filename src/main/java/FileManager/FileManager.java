@@ -12,12 +12,12 @@ import java.util.ArrayList;
 
 public class FileManager
 {
-    private final FileSystemManager_I fileSystemManager;
+    private final FileSystemManager_I fileSystemManager_I;
     private final String urlBase;
 
     public FileManager(String urlBase)
     {
-        fileSystemManager = new FileSystemManagerWindows();
+        fileSystemManager_I = new FileSystemManagerWindows();
         this.urlBase = urlBase;
     }
 
@@ -33,7 +33,7 @@ public class FileManager
             }
             try
             {
-                return fileSystemManager.makeDirectory(newDirName);
+                return fileSystemManager_I.makeDirectory(newDirName);
             }
             catch (FileSystemManagerException fileSystemManagerException)
             {
@@ -52,7 +52,7 @@ public class FileManager
     {
         try
         {
-            fileSystemManager.deleteDirectory(dirName);
+            fileSystemManager_I.deleteDirectory(dirName);
         }
         catch (FileSystemManagerException fileSystemManagerException)
         {
@@ -74,7 +74,7 @@ public class FileManager
     {
         try
         {
-            fileSystemManager.callDirectory(dirName);
+            fileSystemManager_I.callDirectory(dirName);
         }
         catch (FileSystemManagerException fileSystemManagerException)
         {
@@ -96,7 +96,7 @@ public class FileManager
     {
         try
         {
-            return fileSystemManager.getFile(fileName);
+            return fileSystemManager_I.getFile(fileName);
         }
         catch(FileSystemManagerException fileSystemManagerException)
         {
@@ -128,7 +128,7 @@ public class FileManager
             }
             try
             {
-                return fileSystemManager.saveFile(url, saveFileName);
+                return fileSystemManager_I.saveFile(url, saveFileName);
             }
             catch (FileSystemManagerException fileSystemManagerException)
             {
@@ -147,7 +147,7 @@ public class FileManager
     {
         try
         {
-            fileSystemManager.deleteFile(fileName);
+            fileSystemManager_I.deleteFile(fileName);
         }
         catch (FileSystemManagerException fileSystemManagerException)
         {
@@ -166,7 +166,8 @@ public class FileManager
 
     public ArrayList<String> printFilesInDir()
     {
-        ArrayList<Pair<String, Boolean>> pairsArrayList = fileSystemManager.printFilesInDir();
+        ArrayList<Pair<String, Boolean>> pairsArrayList =
+                fileSystemManager_I.printFilesInDir();
 
         if (pairsArrayList == null)
         {
@@ -176,7 +177,7 @@ public class FileManager
         ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
         String currentDirectory = "\uD83D\uDDC2" +
                                     " " +
-                                    fileSystemManager.getCurrentDirectory();
+                                    fileSystemManager_I.getCurrentDirectory();
         filesFormatedStringsArrayList.add(currentDirectory);
         for (Pair<String, Boolean> pair : pairsArrayList)
         {
