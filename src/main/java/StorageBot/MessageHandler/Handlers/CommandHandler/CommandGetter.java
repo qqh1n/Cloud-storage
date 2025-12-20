@@ -23,7 +23,13 @@ public class CommandGetter
         Command_I deleteFileCommand = new DeleteFileCommand(fileManager);
         Command_I getFilesSummaryCommand = new GetFilesSummaryCommand(fileManager);
         Command_I getFileCommand = new GetFileCommand(fileManager);
+        Command_I changeStorage = new ChangeStorageCommand(fileManager);
+        Command_I makeStorage = new MakeStorageCommand(fileManager);
+        Command_I getStorageId = new GetStorageIdCommand(fileManager);
 
+        commandsHashMap.put("/chstg", changeStorage);
+        commandsHashMap.put("/mkstg", makeStorage);
+        commandsHashMap.put("/getStgId", getStorageId);
         commandsHashMap.put("/start", startCommand);
         commandsHashMap.put("/mkdir", makeDirectoryCommand);
         commandsHashMap.put("/rmdir", deleteDirectoryCommand);

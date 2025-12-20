@@ -1,6 +1,8 @@
 package StorageBot.MessageHandler.Handlers.CommandHandler.Commands;
 
 import FileManager.FileManager;
+import FileManager.FileManagerException;
+import StorageBot.MessageHandler.Handlers.CommandHandler.CommandHandlerException;
 
 import java.util.ArrayList;
 
@@ -14,21 +16,31 @@ public class GetFilesSummaryCommand implements Command_I
     }
 
     public Object execute(String[] args)
+            throws CommandHandlerException
     {
-        ArrayList<String> filesArrayList = fileManager.printFilesInDir();
+        try {
+            ArrayList<String> filesArrayList = fileManager.printFilesInDir();
 
-        if (filesArrayList == null)
-        {
-            return "Эта директоря пуста.";
+            if (filesArrayList == null) {
+                return "Эта директория пуста.";
+            }
+
+            String resultString = "";
+
+            for (String line : filesArrayList) {
+                resultString = resultString.concat(line.concat("\n"));
+            }
+
+            return resultString;
         }
-
-        String resultString = "";
-
-        for (String line : filesArrayList)
+        catch (FileManagerException fileManagerException)
         {
-            resultString = resultString.concat(line.concat("\n"));
+            if (fileManagerException.getCode() == 8)
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
+            return null;
         }
-
-        return resultString;
     }
 }

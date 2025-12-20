@@ -11,7 +11,11 @@ public class FileManagerException
         UNABLE_TO_DELETE_FILE(3, "Unable to delete file."),
         NO_SUCH_DIR_EXISTS(4, "No such directory."),
         UNABLE_TO_CALL_DIRECTORY(5, "Unable to call directory."),
-        UNABLE_TO_DELETE_DIRECTORY(6, "Unable to delete directory.");
+        UNABLE_TO_DELETE_DIRECTORY(6, "Unable to delete directory."),
+        NO_SUCH_STORAGE(7, "No such storage."),
+        STORAGE_IS_NOT_SELECTED(8, "Storage is not selected."),
+        UNABLE_TO_CREATE_STORAGE(9, "Unable to create storage."),
+        STORAGE_EXISTS(10, "Storage exists.");
 
         private final int e_code;
         private final String message;

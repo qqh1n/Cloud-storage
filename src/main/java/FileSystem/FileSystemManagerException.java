@@ -11,7 +11,12 @@ public class FileSystemManagerException extends Exception
         UNABLE_TO_CALL_DIR(4, "Unable to call directory."),
         UNABLE_TO_MAKE_DIR(5, "Unable to make directory."),
         SUCH_DIR_EXISTS(6, "Such directory exist."),
-        UNABLE_TO_DELETE_DIR(7, "Unable to delete directory.");
+        UNABLE_TO_DELETE_DIR(7, "Unable to delete directory."),
+        NO_SUCH_STORAGE(8, "No such storage."),
+        STORAGE_IS_NOT_SELECTED(9, "Storage is not selected."),
+        UNABLE_TO_MAKE_STORAGE(10, "Unable to make storage."),
+        STORAGE_EXISTS(11, "Storage exists.");
+
 
         private final int e_code;
         private final String message;

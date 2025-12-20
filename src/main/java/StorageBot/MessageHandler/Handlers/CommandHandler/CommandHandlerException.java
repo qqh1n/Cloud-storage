@@ -16,7 +16,13 @@ public class CommandHandlerException
                 "Превышен лимит попыток создания директории."),
         NO_SUCH_DIR_EXISTS(8,"Папки с таким именем не существует."),
         UNABLE_TO_CALL_DIR(9, "Невозможно перейти в папку."),
-        UNABLE_TO_DELETE_DIR(10, "Невозможно удалить папку.");
+        UNABLE_TO_DELETE_DIR(10, "Невозможно удалить папку."),
+        INVALID_STORAGE_ID(11, "Неверный формат id."),
+        NO_SUCH_STORAGE(12, "Хранилища с таким id существует."),
+        STORAGE_IS_NOT_SELECTED(13, "Хранилище не выбрано."),
+        UNABLE_TO_CREATE_STORAGE(14, "Невозможно создать хранилище."),
+        STORGE_EXISTS(15, "Хранилище с таким id уже существует.");
+
 
 
 

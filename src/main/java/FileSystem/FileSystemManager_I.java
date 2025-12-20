@@ -8,10 +8,12 @@ import java.util.ArrayList;
 
 public interface FileSystemManager_I
 {
-    String getCurrentDirectory();
+    String getCurrentDirectory()
+            throws FileSystemManagerException;
     String saveFile(URL url, String fileName)
             throws FileSystemManagerException;
-    ArrayList<Pair<String, Boolean>> printFilesInDir();
+    ArrayList<Pair<String, Boolean>> printFilesInDir()
+            throws FileSystemManagerException;
     Pair<FileInputStream, String> getFile(String fileName)
             throws FileSystemManagerException;
     void deleteFile(String fileName)
@@ -22,4 +24,9 @@ public interface FileSystemManager_I
             throws FileSystemManagerException;
     void callDirectory(String dirName)
             throws FileSystemManagerException;
+    void changeStorage(String storageId)
+            throws FileSystemManagerException;
+    void makeStorage(String storageId)
+            throws FileSystemManagerException;
+    String getStorageId();
 }

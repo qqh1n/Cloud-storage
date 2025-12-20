@@ -11,7 +11,8 @@ import java.util.Stack;
 public class FileSystemManagerWindows
         implements FileSystemManager_I
 {
-    private final String ROOT_DIRECTORY;
+    private final String STORAGE_DIRECTORY;
+    private String ROOT_DIRECTORY;
     private final String separator = File.separator;
     private String currentDirectory;
 
@@ -19,13 +20,21 @@ public class FileSystemManagerWindows
     public FileSystemManagerWindows()
     {
         ConfigLoader configLoader = new ConfigLoader();
-        ROOT_DIRECTORY = configLoader.getRootDir();
-        currentDirectory = ROOT_DIRECTORY;
+        STORAGE_DIRECTORY = configLoader.getRootDir();
+        ROOT_DIRECTORY = null;
+        currentDirectory = null;
     }
 
 
     public String getCurrentDirectory()
+            throws FileSystemManagerException
     {
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
         if (currentDirectory.equals(ROOT_DIRECTORY))
         {
             return "." + separator;
@@ -47,18 +56,14 @@ public class FileSystemManagerWindows
     }
 
 
-    private boolean isFileExists(String fileName)
+    private boolean isFileExists(File file)
     {
-        String path = getPath(fileName);
-        File file = new File(path);
         return file.exists() && file.isFile();
     }
 
 
-    private boolean isDirExists(String dirName)
+    private boolean isDirExists(File dir)
     {
-        String path = getPath(dirName);
-        File dir = new File(path);
         return dir.exists() && dir.isDirectory();
     }
 
@@ -66,9 +71,15 @@ public class FileSystemManagerWindows
     public String makeDirectory(String dirName)
             throws FileSystemManagerException
     {
-        if (!isDirExists(dirName))
+        if (ROOT_DIRECTORY == null)
         {
-            File newDir = new File(getPath(dirName));
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
+        File newDir = new File(getPath(dirName));
+        if (!isDirExists(newDir))
+        {
             if (!newDir.mkdir())
             {
                 throw new FileSystemManagerException(
@@ -87,12 +98,18 @@ public class FileSystemManagerWindows
     public void deleteDirectory(String dirName)
             throws FileSystemManagerException
     {
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
         if (dirName.equals(".") || dirName.equals(".."))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_DIR);
         }
-        if (!isDirExists(dirName))
+        if (!isDirExists(new File(dirName)))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
@@ -157,6 +174,12 @@ public class FileSystemManagerWindows
     public void callDirectory(String dirName)
             throws FileSystemManagerException
     {
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
         if (dirName.equals("."))
         {
             currentDirectory = ROOT_DIRECTORY;
@@ -173,7 +196,7 @@ public class FileSystemManagerWindows
                 currentDirectory = currentDirectory.substring(0, indexRightSlash);
             }
         }
-        else if (isDirExists(dirName))
+        else if (isDirExists(new File(getPath(dirName))))
         {
             currentDirectory = getPath(dirName);
         }
@@ -188,6 +211,12 @@ public class FileSystemManagerWindows
     public Pair<FileInputStream, String> getFile(String fileName)
             throws FileSystemManagerException
     {
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
         try
         {
             return new Pair<>(
@@ -203,7 +232,14 @@ public class FileSystemManagerWindows
 
 
     public ArrayList<Pair<String, Boolean>> printFilesInDir()
+            throws FileSystemManagerException
     {
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
         File[] filesInDir =
                 new File(currentDirectory).listFiles();
         ArrayList<Pair<String, Boolean>> fileNameIsFileArrayList =
@@ -227,7 +263,13 @@ public class FileSystemManagerWindows
     public String saveFile(URL url, String fileName)
             throws FileSystemManagerException
     {
-        if (!isFileExists(fileName))
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
+        if (!isFileExists(new File(fileName)))
         {
 
             int buffer;
@@ -264,7 +306,13 @@ public class FileSystemManagerWindows
     public void deleteFile(String fileName)
             throws FileSystemManagerException
     {
-        if (!isFileExists(fileName))
+        if (ROOT_DIRECTORY == null)
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+        }
+
+        if (!isFileExists(new File(fileName)))
         {
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.NO_SUCH_FILE_EXIST);
@@ -277,5 +325,51 @@ public class FileSystemManagerWindows
             throw new FileSystemManagerException(
                     FileSystemManagerException.ErrorCode.UNABLE_TO_DELETE_FILE);
         }
+    }
+
+    public void changeStorage(String storageId)
+        throws FileSystemManagerException
+    {
+        String storagePath = STORAGE_DIRECTORY + separator + storageId;
+        if (isDirExists(new File(storagePath)))
+        {
+            ROOT_DIRECTORY = storagePath;
+            currentDirectory = storagePath;
+        }
+        else
+        {
+            throw new FileSystemManagerException(FileSystemManagerException.
+                    ErrorCode.NO_SUCH_STORAGE);
+        }
+    }
+
+    public void makeStorage(String storageId)
+            throws FileSystemManagerException
+    {
+        String storagePath = STORAGE_DIRECTORY + separator + storageId;
+        File newStorage = new File(storagePath);
+
+        if (!isDirExists(newStorage))
+        {
+            if (newStorage.mkdir())
+            {
+                changeStorage(storageId);
+            }
+            else
+            {
+                throw new FileSystemManagerException(
+                        FileSystemManagerException.ErrorCode.UNABLE_TO_MAKE_STORAGE);
+            }
+        }
+        else
+        {
+            throw new FileSystemManagerException(
+                    FileSystemManagerException.ErrorCode.STORAGE_EXISTS);
+        }
+    }
+
+    public String getStorageId()
+    {
+        return ROOT_DIRECTORY.substring(ROOT_DIRECTORY.lastIndexOf(separator) + 1);
     }
 }

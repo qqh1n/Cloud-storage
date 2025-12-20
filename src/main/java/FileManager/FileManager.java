@@ -21,6 +21,39 @@ public class FileManager
         this.urlBase = urlBase;
     }
 
+    public void changeStorage(String storageId)
+        throws FileManagerException
+    {
+        try
+        {
+            fileSystemManager_I.changeStorage(storageId);
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
+        {
+            throw new FileManagerException(FileManagerException.
+                    ErrorCode.NO_SUCH_STORAGE);
+        }
+    }
+
+    public void makeStorage(String storageId)
+            throws FileManagerException
+    {
+        try
+        {
+            fileSystemManager_I.makeStorage(storageId);
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
+        {
+            if (fileSystemManagerException.getCode() == 10)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.UNABLE_TO_CREATE_STORAGE);
+            }
+            throw new FileManagerException(
+                    FileManagerException.ErrorCode.STORAGE_EXISTS);
+        }
+    }
+
     public String makeDirectory(String dirName)
             throws FileManagerException
     {
@@ -37,6 +70,11 @@ public class FileManager
             }
             catch (FileSystemManagerException fileSystemManagerException)
             {
+                if (fileSystemManagerException.getCode() == 9)
+                {
+                    throw new FileManagerException(
+                            FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+                }
                 if (i == 1000)
                 {
                     throw new FileManagerException(
@@ -45,6 +83,11 @@ public class FileManager
             }
         }
         return dirName;
+    }
+
+    public String getStorageId()
+    {
+        return fileSystemManager_I.getStorageId();
     }
 
     public void deleteDirectory(String dirName)
@@ -56,7 +99,12 @@ public class FileManager
         }
         catch (FileSystemManagerException fileSystemManagerException)
         {
-            if (fileSystemManagerException.getCode() == 3)
+            if (fileSystemManagerException.getCode() == 9)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
+            else if (fileSystemManagerException.getCode() == 3)
             {
                 throw new FileManagerException(
                         FileManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
@@ -78,7 +126,12 @@ public class FileManager
         }
         catch (FileSystemManagerException fileSystemManagerException)
         {
-            if (fileSystemManagerException.getCode() == 3)
+            if (fileSystemManagerException.getCode() == 9)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
+            else if (fileSystemManagerException.getCode() == 3)
             {
                 throw new FileManagerException(
                         FileManagerException.ErrorCode.NO_SUCH_DIR_EXISTS);
@@ -100,6 +153,12 @@ public class FileManager
         }
         catch(FileSystemManagerException fileSystemManagerException)
         {
+            if (fileSystemManagerException.getCode() == 9)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
+
             throw new FileManagerException(
                     FileManagerException.ErrorCode.NO_SUCH_FILE);
         }
@@ -132,6 +191,12 @@ public class FileManager
             }
             catch (FileSystemManagerException fileSystemManagerException)
             {
+                if (fileSystemManagerException.getCode() == 9)
+                {
+                    throw new FileManagerException(
+                            FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+                }
+
                 if (i == 1000)
                 {
                     throw new FileManagerException(
@@ -151,7 +216,12 @@ public class FileManager
         }
         catch (FileSystemManagerException fileSystemManagerException)
         {
-            if (fileSystemManagerException.getCode() == 0)
+            if (fileSystemManagerException.getCode() == 9)
+            {
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
+            else if (fileSystemManagerException.getCode() == 0)
             {
                 throw new FileManagerException(
                         FileManagerException.ErrorCode.NO_SUCH_FILE);
@@ -165,38 +235,46 @@ public class FileManager
     }
 
     public ArrayList<String> printFilesInDir()
+            throws FileManagerException
     {
-        ArrayList<Pair<String, Boolean>> pairsArrayList =
-                fileSystemManager_I.printFilesInDir();
-
-        if (pairsArrayList == null)
+        try
         {
-            return null;
-        }
+            ArrayList<Pair<String, Boolean>> pairsArrayList =
+                    fileSystemManager_I.printFilesInDir();
 
-        ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
-        String currentDirectory = "\uD83D\uDDC2" +
-                                    " " +
-                                    fileSystemManager_I.getCurrentDirectory();
-        filesFormatedStringsArrayList.add(currentDirectory);
-        for (Pair<String, Boolean> pair : pairsArrayList)
+            if (pairsArrayList == null) {
+                return null;
+            }
+
+            ArrayList<String> filesFormatedStringsArrayList = new ArrayList<>();
+            String currentDirectory = "\uD83D\uDDC2" +
+                    " " +
+                    fileSystemManager_I.getCurrentDirectory();
+            filesFormatedStringsArrayList.add(currentDirectory);
+            for (Pair<String, Boolean> pair : pairsArrayList) {
+                if (pair.getSecond() == false) {
+                    String fileFormatedString = "\t\t\uD83D\uDDC2" +
+                            " " +
+                            pair.getFirst();
+                    filesFormatedStringsArrayList.add(fileFormatedString);
+                } else if (pair.getSecond() == true) {
+                    String fileFormatedString = "\t\t\uD83D\uDCC4" +
+                            " " +
+                            pair.getFirst();
+                    filesFormatedStringsArrayList.add(fileFormatedString);
+                }
+            }
+
+            return filesFormatedStringsArrayList;
+        }
+        catch (FileSystemManagerException fileSystemManagerException)
         {
-            if (pair.getSecond() == false)
+            if (fileSystemManagerException.getCode() == 9)
             {
-                String fileFormatedString = "\t\t\uD83D\uDDC2" +
-                                            " " +
-                                            pair.getFirst();
-                filesFormatedStringsArrayList.add(fileFormatedString);
-            }
-            else if (pair.getSecond() == true)
-            {
-                String fileFormatedString = "\t\t\uD83D\uDCC4" +
-                                            " " +
-                                            pair.getFirst();
-                filesFormatedStringsArrayList.add(fileFormatedString);
+                throw new FileManagerException(
+                        FileManagerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
             }
         }
-
-        return filesFormatedStringsArrayList;
+        return null;
     }
 }

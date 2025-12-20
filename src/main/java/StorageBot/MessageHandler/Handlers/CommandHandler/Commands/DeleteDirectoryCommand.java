@@ -29,7 +29,12 @@ public class DeleteDirectoryCommand implements Command_I
         }
         catch (FileManagerException fileManagerException)
         {
-            if (fileManagerException.getCode() == 4)
+            if (fileManagerException.getCode() == 8)
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
+            else if (fileManagerException.getCode() == 4)
             {
                 throw new CommandHandlerException(
                         CommandHandlerException.ErrorCode.NO_SUCH_DIR_EXISTS);

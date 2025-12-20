@@ -3,6 +3,7 @@ package StorageBot.MessageHandler.Handlers.CommandHandler;
 import FileManager.FileManager;
 import Pair.Pair;
 import StorageBot.MessageHandler.Handlers.CommandHandler.Commands.Command_I;
+import StorageBot.MessageHandler.Handlers.CommandHandler.Commands.MakeDirectoryCommand;
 import StorageBot.MessageHandler.Handlers.MessageHandler_I;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -56,7 +57,7 @@ public class CommandHandler implements MessageHandler_I<CommandHandlerException>
         executableCommand = commandGetter.getCommand(commandName);
         if (executableCommand != null) {
             sendMessage(message.getChatId(),
-                    executableCommand.execute(new String[]{argument}));
+                    executableCommand.execute(new String[]{argument, message.getChatId().toString()}));
         } else {
             throw new CommandHandlerException(
                     CommandHandlerException.ErrorCode.UNKNOWN_COMMAND);

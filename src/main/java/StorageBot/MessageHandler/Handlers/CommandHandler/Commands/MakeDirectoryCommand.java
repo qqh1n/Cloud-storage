@@ -31,7 +31,11 @@ public class MakeDirectoryCommand implements Command_I
         }
         catch (FileManagerException fileManagerException)
         {
-
+            if (fileManagerException.getCode() == 8)
+            {
+                throw new CommandHandlerException(
+                        CommandHandlerException.ErrorCode.STORAGE_IS_NOT_SELECTED);
+            }
             throw new CommandHandlerException(
                     CommandHandlerException.ErrorCode.UPLOAD_ATTEMPTS_LIMIT_EXCEEDED);
         }
